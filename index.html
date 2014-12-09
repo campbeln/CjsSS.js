@@ -1,0 +1,844 @@
+<html>
+    <head>
+        <title>CjsSS.js :: Cascading Javascript Style Sheets :: Next Generation CSS Preprocessor | Reprocessor</title>
+        
+        <style type="text/css" cjsss='{ "scope": "global", "expose": true }'>
+            /* Fonts */
+            @font-face {
+                font-family: 'Comic Sans';
+                src: url('./css/fonts/Comic Sans MS Regular.eot');
+                src: local('☺'), url('./css/fonts/Comic Sans MS Regular.woff') format('woff'), url('./css/fonts/Comic Sans MS Regular.ttf') format('truetype'), url('./css/fonts/Comic Sans MS Regular.svg') format('svg');
+                font-weight: normal;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Helvetica';
+                src: url('./css/fonts/Helvetica.eot');
+                src: local('☺'), url('./css/fonts/Helvetica.woff') format('woff'), url('./css/fonts/Helvetica.ttf') format('truetype'), url('./css/fonts/Helvetica.svg') format('svg');
+                font-weight: normal;
+                font-style: normal;
+            }
+            
+            /* Micro Clearfix (http://nicolasgallagher.com/micro-clearfix-hack/)
+             * content: The space content is one way to avoid an Opera bug when the contenteditable attribute is included anywhere else in the document. Otherwise it causes space to appear at the top and bottom of elements that are clearfixed.
+             * display: The use of `table` rather than `block` is only necessary if using `:before` to contain the top-margins of child elements.
+             * *zoom:   For IE 6/7 only, include this rule to trigger hasLayout and contain floats.
+             * clear:   The clearfix ;)
+             */
+            .cf:before,
+            .cf:after {
+                content: " ";
+                display: table;
+            }
+            .cf:after {
+                clear: both;
+            }
+            .cf {
+                *zoom: 1;
+            }
+
+            /*
+                <script>
+                </script>
+            */
+
+
+            /* Site CSS */
+            HTML, BODY, FORM {
+                font-family: "adelle", Georgia, "Times New Roman", Times, serif;
+                padding: 0;
+                margin: 0;
+            }
+            
+            /*  */
+            H1 {
+                font-family: /*{{oCSS.$fonts.pretty}}*/;
+                font-size: 500%;
+                margin: 1% 0 0 0;
+                text-align: center;
+            }
+            H2 {
+                font-family: /*{{oCSS.$fonts.pretty}}*/;
+                font-size: 350%;
+                margin: 1% 0 2% 0;
+            }
+            H3 {
+                font-family: /*{{oCSS.$fonts.pretty}}*/;
+                font-size: 200%;
+                margin: 1% 0 2% 0;
+            }
+
+            A {
+                color: maroon;
+                text-decoration: none;
+            }
+                A:hover {
+                    border-bottom: 1px solid /*{{oColors.red}}*/;
+                }
+
+
+            SPAN.ugly {
+                font-family: /*{{oCSS.$fonts.ugly}}*/;
+                color: /*{{oColorSets.green}}*/;
+            }
+            SPAN.pretty {
+                font-family: /*{{oCSS.$fonts.pretty}}*/;
+                color: /*{{oColorSets.pink}}*/;
+            }
+            
+            UL#demo {
+                list-style: none;
+                margin-top: -2em;
+            }
+                UL#demo LI {
+                    height: 3em;
+                    width: 3em;
+                    margin: 5px;
+                    list-style: none;
+                    display: inline-block;
+                    border: 4px solid white;
+                    cursor: pointer;
+                }
+                    UL#demo LI.active {
+                        border-color: black;
+                    }
+
+            #cj {
+                width: 70%;
+                background-color: /*{{oCSS.mainColor}}*/;
+                margin-top: 1em;
+            }
+
+            .donate,
+            .download {
+                top: 2%;
+                right: 2%;
+                font-size: 150%;
+                background: none repeat scroll 0 0 /*{{oCSS.mainColor}}*/;
+                border-radius: 30px;
+                color: #ffffff;
+                padding: 1% 2%;
+                text-decoration: none;
+                position: absolute;
+                border: 0;
+            }
+            .donate {
+                top: inherit;
+                background-color: /*{{oColors.blue}}*/;
+                cursor: pointer;
+                margin-top: -1.5%;
+            }
+
+
+            PRE {
+                display: inline;
+                
+                padding: 1px;
+            }
+                PRE.i {
+                    font-style: oblique;
+                    text-decoration: underline;
+                    text-decoration-style: wavy;
+                    -moz-text-decoration-style: wavy;
+                    text-decoration-color: /*{{oCSS.highlight}}*/;
+                    -moz-text-decoration-color: /*{{oCSS.highlight}}*/;
+                }
+                    PRE.i:before {
+                        content: "[";
+                    }
+                    PRE.i:after {
+                        content: "]";
+                    }
+                PRE > STRONG {
+                    background-color: /*{{oCSS.highlight}}*/;
+                }
+
+            .splash {
+                padding: 0 0 2% 0;
+                text-align: center;
+            }
+                .splash H1 {
+                    margin-top: /*{{oCSS.splash.h1_marginTop}}*/;
+                }
+                .splash H1 > SPAN {
+                    font-family: /*{{oCSS.$fonts.ugly}}*/;
+                    font-size: 80%;
+                    display: inline-block;
+                    margin: /*{{oCSS.splash.h1_span_marginTop}}*/ -0.08em 0 -0.17em;
+                    -webkit-transform: rotate(-15deg);
+                    -o-transform: rotate(-15deg);
+                    transform: rotate(-15deg);
+                }
+                    .splash H1 > SPAN > SPAN {
+                        font-size: 50%;
+                        color: /*{{oCSS.mainColor}}*/;
+                    }
+                .splash .tagline {
+                    font-size: 150%;
+                    margin: -0.4em 0 0 0;
+                    text-align: center;
+                }
+
+            .overview,
+            .options,
+            .gettingstarted,
+            .gotchas,
+            .snake,
+            .about {
+                width: 80%;
+                padding: 3% 10% 3% 10%;
+                clear: both;
+                line-height: 120%;
+            }
+
+            .about {
+                background-color: /*{{oCSS.mainColor}}*/;
+                color: /*{{oCSS.about.color}}*/;
+            }
+                .about > P:first-of-type {
+                    margin-top: 0;
+                }
+                .about A {
+                    color: /*{{oCSS.about.a}}*/;
+                }
+                    .about A:hover {
+                        border-bottom: 1px solid /*{{oCSS.about.a}}*/;
+                    }
+
+
+            .gettingstarted {
+                background-color: /*{{oCSS.gettingStarted.backgroundColor}}*/;
+                color: /*{{oCSS.gettingStarted.color}}*/;
+            }
+                .gettingstarted BLOCKQUOTE {
+                    color: black;
+                }
+                .gettingstarted A {
+                    color: /*{{oCSS.gettingStarted.a}}*/;
+                }
+                    .gettingstarted A:hover {
+                        border-bottom: 1px solid /*{{oCSS.gettingStarted.a}}*/;
+                    }
+
+            .gotchas {
+                background-color: /*{{oCSS.gotchas.backgroundColor}}*/;
+                color: /*{{oCSS.gotchas.color}}*/;
+            }
+                .gotchas A {
+                    color: /*{{oCSS.gotchas.a}}*/;
+                }
+                    .gotchas A:hover {
+                        border-bottom: 1px solid /*{{oCSS.gotchas.a}}*/;
+                    }
+
+            .overview {
+                background-color: /*{{oCSS.overview.backgroundColor}}*/;
+                color: /*{{oCSS.overview.color}}*/;
+            }
+                .overview UL LI {
+                    width: 48%;
+                }
+                    .overview UL LI:nth-of-type(odd) {
+                        float: left;
+                        clear: left;
+                    }
+                    .overview UL LI:nth-of-type(even) {
+                        float: right;
+                        clear: right;
+                    }
+                    .overview UL LI STRONG {
+                        text-transform: uppercase;
+                    }
+                .overview A {
+                    color: /*{{oCSS.overview.a}}*/;
+                }
+                    .overview A:hover {
+                        border-bottom: 1px solid /*{{oCSS.overview.a}}*/;
+                    }
+
+            .options .column {
+                width: 48%;
+            }
+                .options > DIV.c1of2 {
+                    float: left;
+                }
+                .options > DIV.c2of2 {
+                    float: right;
+                }
+                .options .column > H3 {
+                    margin: 4% 0 1.5% 0;
+                }
+                .options .column EM {
+                    display: block;
+                    margin: 0 0 0 3%;
+                }
+                    .options .column EM:last-of-type:before {
+                        content: "Default Value: ";
+                    }
+                    .options .column EM:last-of-type {
+                        margin-bottom: 2%;
+                    }
+                .options .note {
+                    font-style: italic;
+                    font-size: 90%;
+                    margin-top: 2%;
+                }
+                    .options .note:before {
+                        content: "NOTE: ";
+                    }
+
+            BLOCKQUOTE {
+                background: none repeat scroll 0 0 /*{{oColors.gray}}*/;
+                border-radius: 10px;
+                padding: 1% 2%;
+                max-width: 750px;
+            }
+
+            em.comment {
+                color: /*{{oColors.darkGreen}}*/;
+            }
+            em.script {
+                color: /*{{oColors.red}}*/;
+            }
+            em.ng:after {
+                content: "}}";
+            }
+                em.ng:before {
+                    content: "{{";
+                }
+        </style>
+
+        <script>
+            var oCSS,
+                oFonts = {
+                    Arial: 'arial',
+                    Helvetica: 'Helvetica',
+                    ComicSans: 'Comic Sans'
+                },
+                oColors = {
+                    lightBrown: '#b29782',
+                    brown: '#554233',   // snake brown
+                    yellow: '#d4c668',
+                    green: '#469069',
+                    darkGreen: '#1b3e19',
+                    pink: '#c695cf',
+                    blue: '#182133',
+                    red: 'maroon',
+                    gray: '#eeeeee'
+                },
+                oColorSets = {
+                    blue: {
+                        backgroundColor: oColors.blue,
+                        color: "white",
+                        a: oColors.yellow
+                    },
+                    green: {
+                        backgroundColor: oColors.green,
+                        color: "white",
+                        a: oColors.yellow
+                    },
+                    brown: {
+                        backgroundColor: oColors.lightBrown,
+                        color: "black",
+                        a: oColors.red
+                    }
+                }
+            ;
+            
+            //# 
+            oCSS = {
+                mainColor: oColors.yellow,
+                $fonts: {
+                    pretty: oFonts.Helvetica,
+                    ugly: oFonts.ComicSans
+                },
+                splash: {
+                    h1_marginTop: "0.9%",
+                    h1_span_marginTop: "-1.7em"
+                },
+                about: {
+                    color: "black",
+                    a: oColors.red
+                },
+                highlight: oColors.yellow,
+                overview: oColorSets.blue,
+                gettingStarted: oColorSets.green,
+                gotchas: oColorSets.brown
+            };
+
+            //# Safely converts "rgb(x,x,x)" into "#xxxxxx"
+            function rgb2hex(rgb) {
+                if (/^#[0-9A-F]{6}$/i.test(rgb)) return rgb;
+
+                rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+                function hex(x) {
+                    return ("0" + parseInt(x).toString(16)).slice(-2);
+                }
+                return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
+            }
+
+            //# 
+            function mutateCSS($li) {
+                var i,
+                    $cj = document.getElementById("cj"),
+                    $ul = document.getElementById("demo").children
+                ;
+                
+                //# Traverse the $ul, removing .active as we go
+                for (i = 0; i < $ul.length; i++) {
+                    $ul[i].className = "";
+                }
+                
+                //# Set the passed $li to .active then collect the .mainColor from the $li's .backgroundColor (converting from "rgb(x,x,x)" to "#xxxxxx" as we go)
+                $li.className = "active";
+                oCSS.mainColor = rgb2hex($li.style.backgroundColor);
+                oCSS.highlight = oCSS.mainColor;
+
+                //# 
+                switch (oCSS.mainColor) {
+                    case oColors.brown: {
+                        oCSS.highlight = oColors.lightBrown;
+
+                        oCSS.$fonts.pretty = oFonts.Arial;
+                        oCSS.$fonts.ugly = oFonts.ComicSans;
+                        oCSS.about.color = "white";
+                        oCSS.about.a = oColors.yellow;
+                        oCSS.splash.h1_span_marginTop = "-1.7em";
+                        oCSS.splash.h1_marginTop = "1%";
+                        oCSS.overview = oColorSets.brown;
+                        oCSS.gettingStarted = oColorSets.blue;
+                        oCSS.gotchas = oColorSets.green;
+                        break;
+                    }
+                    case oColors.yellow: {
+                        oCSS.$fonts.pretty = oFonts.Helvetica;
+                        oCSS.$fonts.ugly = oFonts.ComicSans;
+                        oCSS.about.color = "black";
+                        oCSS.about.a = oColors.red;
+                        oCSS.splash.h1_span_marginTop = "-1.7em";
+                        oCSS.splash.h1_marginTop = "0.9%";
+                        oCSS.overview = oColorSets.blue;
+                        oCSS.gettingStarted = oColorSets.green;
+                        oCSS.gotchas = oColorSets.brown;
+                        break;
+                    }
+                    case oColors.pink: {
+                        oCSS.$fonts.pretty = oFonts.ComicSans;
+                        oCSS.$fonts.ugly = oFonts.Helvetica;
+                        oCSS.about.color = "black";
+                        oCSS.about.a = oColors.red;
+                        oCSS.splash.h1_span_marginTop = "-1.5em";
+                        oCSS.splash.h1_marginTop = "0";
+                        oCSS.overview = oColorSets.green;
+                        oCSS.gettingStarted = oColorSets.brown;
+                        oCSS.gotchas = oColorSets.blue;
+                        break;
+                    }
+                }
+                
+                cjsss.process();
+            }
+        </script>
+
+        <script type="text/javascript" src="js/cjsss-polyfill.js"></script> <!-- IE6-7 support -->
+        <script type="text/javascript" src="js/cjsss.js"></script>
+    </head>    
+    <body>
+        <div class="splash">
+            <a class="download" href="https://github.com/campbeln/ngcss">Download From GitHub</a>
+
+            <h1>
+                C<span><span>&lt;</span>js<span>&gt;</span></span>SS.js
+            </h1>
+            <span class="tagline">Next Generation CSS Preprocessor | Reprocessor</span>
+
+            <br/><img src="img/cj.png" id="cj" />
+            <ul id="demo">
+                <li style="background-color: #554233;" onclick="mutateCSS(this)"></li>
+                <li style="background-color: #d4c668;" class="active" onclick="mutateCSS(this)"></li>
+                <li style="background-color: #c695cf;" onclick="mutateCSS(this)"></li>
+            </ul>
+
+            <span class="tagline">You <em>already</em> know both languages (and you only hate <em>one</em> of them)!</span>
+            <!--<span class="tagline">Like that hot girl in highschool; <span class="pretty">pretty</span> on the outside but <span class="ugly">ugly</span> on the inside.</span>-->
+        </div>
+        
+        <div class="overview">
+            <h2>Overview</h2>
+            <p>
+                CjsSS (Cascading Javascript Style Sheet) is <a href="http://www.lesscss.org/">LESS</a> <a href="http://www.sass-lang.com/">SASS</a>y and more <a href="http://learnboost.github.io/stylus/">Stylus</a>h than the competition ;)
+            </p>
+            <ul class="cf">
+                <li><strong>Browser Support:</strong> IE8+ <em>(or IE6+ with optional cjsss.polyfill.js or <a href="http://www.jquery.com/">jQuery</a>)</em></li>
+                    <li><strong>Licensing Fees:</strong> $0, nada, nutin'.. but <a href="#about">Nick does accept tips</a>; licensed under the <a href="http://opensource.org/licenses/MIT">MIT License</a></li>
+                <li><strong>Installation:</strong> n/a, just include <pre>cjsss.min.js</pre> <em>(<a href="http://nodejs.org/">Node.js</a> optional for server-side preprocessing)</em></li>
+                    <li><strong>Tiny!</strong> Only ~3,300 bytes compressed</li>
+
+                <li>Near-zero learning curve; it's just Javascript embedded within CSS!</li>
+                    <li>Your CSS stays CSS, no language features to learn or mentally decode</li>
+                <li>Vanilla Javascript toolkit with no external dependencies</li>
+                    <li>No need for developer debugging tools, just view source or inspect element</li>
+                <li>Create complex mixins with nested Javascript <pre>object</pre>s</li>
+                    <li>Client-side CSS preprocessor and reprocessor capabilities with no plugins required</li>
+                <li><pre>camelCase</pre> to <pre>dash-case</pre> of Javascript <pre>object</pre> keys converted auto-magicially</li>
+                    <li><pre>eval</pre>uated Javascript fully sandboxed by default</li>
+                <li>Use any Javascript library within your CSS, not just language supported functions</li>
+                    <li>~550 lines of source code is fully commented and accessible to the brave and not-so-brave alike</li>
+            </ul>
+        </div>
+
+        <a name="options"></a>
+        <div class="options cf">
+            <h2>Options</h2>
+            <div class="cf">
+                Option values can be passed into CjsSS.js at a number of points:
+                <ol>
+                    <li>
+                        <pre>&lt;script&gt; cjsss.process("[cjsss]", <strong>{ crlf: "\n" }</strong>); &lt;/script&gt;</pre>
+                        <br/>overrides:
+                    </li>
+                    <li>
+                        <pre>&lt;style type="text/css" <strong>cjsss='{ "crlf": "\r\n" }'</strong> /&gt;</pre>
+                        &nbsp; or &nbsp;
+                        <pre>&lt;link rel="stylesheet" type="text/css" href="css/site.css" <strong>cjsss='{ "crlf": "\r\n" }'</strong> /&gt;</pre>
+                        <br/>override:
+                    </li>
+                    <li>
+                        The default values described below (<a href="#override">which can be overridden</a>).
+                    </li>
+                </ol>
+                In the example above, <pre>crlf</pre> will be set to <pre>\n</pre> as the <pre>cjsss.process()</pre> call's option values override the <pre>STYLE</pre> / <pre>LINK</pre> tags' option values (<pre>\r\n</pre>) and the default value (a <pre>null-string</pre>).
+            </div>
+
+            <div class="column c1of2">
+                <h3>scope</h3>
+                <div>
+                    <em>STRING (Enumeration, see below)</em>
+                    <em>sandbox</em>
+                    The scope that the CjsSS.js-embedded Javascript will be <pre>eval</pre>uated within:
+                    <ul>
+                        <li>
+                            <pre>sandbox</pre> - isolated scope.
+                            Code is evaluated within a detached <pre>IFRAME</pre> with zero access to any of the host page's resources.<a href="#*">*</a>
+                        </li>
+                        <!--
+                            <li>
+                                <pre class="i">object</pre> - isolated scope with the context (<pre>this</pre>) set to the provided <pre>object</pre>.
+                                Code is evaluated within a detached <pre>IFRAME</pre> with access to the provided <pre>object</pre> but with zero access to any of the host page's other resources.<a href="#*">*</a>
+                            </li>
+                        -->
+                        <li>
+                            <pre>local</pre> - non-"use strict" closure scope.
+                            Code is evaluated within the host page with full access to global resources, but once execution is complete embedded Javascript resources are no longer accessable (unless explicitly set within the global scope).
+                        </li>
+                        <li>
+                            <pre>global</pre> - non-"use strict" global scope.
+                            Code is evaluated within the host page's global scope with full access to its global resources, allowing embedded Javascript resources to persist within the global scope.
+                        </li>
+                    </ul>
+                </div>
+
+                <h3>expose</h3>
+                <div>
+                    <em>BOOLEAN</em>
+                    <em>inverse <pre>truthy</pre> value of <pre>selector</pre></em>
+                    Specifies if CjsSS.js functionality is to be made publicially accessable via <pre>window.cjsss</pre>.
+                    Any values set within <pre>window.cjsss</pre> prior to exposure will be retained.
+                    When exposed, the following <pre>object</pre> is made available via <pre>window.cjsss</pre>:
+                    <ul>
+                        <li>
+                            <pre>cjsss.options</pre>
+                            exposes the <pre>object</pre> containing the default option values described in this section, allowing the developer to override any default value.
+                        </li>
+                        <li>
+                            <pre>cjsss.process(vElements, oOptions)</pre>
+                            processes the passed DOM <pre>vElements</pre> reference(s) utilizing the provided <pre>oOptions</pre> <pre>object</pre> in preference to the default values set within <pre>cjsss.options</pre>.
+                        </li>
+                        <li>
+                            <pre>cjsss.services</pre>
+                            exposes an <pre>object</pre> containing the services utilized internally by CjsSS.js, allowing for the overriding of default behavior as well as plugin development.
+                        </li>
+                    </ul>
+                    <div class="note">
+                        If <pre>expose</pre> is set to <pre>true</pre> anywhere, CjsSS.js will be exposed despite any subsequent <pre>expose = false</pre> declarations.
+                        If you wish to remove <pre>window.cjsss</pre> after it has been exposed, you can use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/delete"><pre>delete</pre> operator</a> (e.g. <pre>delete window.cjsss;</pre>).
+                    </div>
+                </div>
+
+                <h3>selector</h3>
+                <div>
+                    <em>STRING (CSS Selector)</em>
+                    <em>[cjsss],[data-cjsss]</em>
+                    The <pre>selector</pre> option defines the CSS selector to use by default.
+                    This <pre>selector</pre> is used when CjsSS.js autoruns and when <pre>cjsss.process()</pre> is called without any <pre>vElements</pre> defined.
+                    If you wish to disable autorun you must <a href="#override">override the default value</a>, resetting it to "" (a <pre>null-string</pre>).
+
+                    <div class="note">
+                        <strong>In-line <pre>selector</pre> values set on <pre>LINK</pre> or <pre>STYLE</pre> tags are ignored</strong> because the tags have already been selected by this point in the lifecycle.
+                    </div>
+                </div>
+            </div>
+            <div class="column c2of2">
+                <h3>optionScope</h3>
+                <div>
+                    <em>STRING (Enumeration, see below)</em>
+                    <em>json</em>
+                    Specifies how the in-line options defined within the <pre>LINK</pre> and <pre>STYLE</pre> tags' <pre>cjsss</pre> attributes are to be parsed:
+                    <ul>
+                        <li>
+                            <pre>json</pre> - as <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON-style object definitions</a> (both keys and values are "double quoted").
+                        </li>
+                        <li>
+                            <pre>sandbox</pre> - isolated scope.
+                            Option code is evaluated within a detached <pre>IFRAME</pre> with zero access to any of the host page's resources.<a href="#*">*</a>
+                        </li>
+                        <!--
+                            <li>
+                                <pre class="i">object</pre> - isolated scope with the context (<pre>this</pre>) set to the provided <pre>object</pre>.
+                                Option code is evaluated within a detached <pre>IFRAME</pre> with access to the provided <pre>object</pre> but with zero access to any of the host page's other resources.<a href="#*">*</a>
+                            </li>
+                        -->
+                        <li>
+                            <pre>local</pre> - non-"use strict" closure scope.
+                            Option code is evaluated within the host page with full access to global resources, but once execution is complete embedded Javascript resources are no longer accessable (unless explicitly set within the global scope).
+                        </li>
+                        <li>
+                            <pre>global</pre> - non-"use strict" global scope.
+                            Option code is evaluated within the host page's global scope with full access to its global resources, allowing embedded Javascript resources to persist within the global scope.
+                        </li>
+                    </ul>
+                    <div class="note">
+                        <strong>In-line <pre>optionScope</pre> values set on <pre>LINK</pre> or <pre>STYLE</pre> tags are ignored</strong> because the options have already been parsed by this point in the lifecycle.
+                    </div>
+                </div>
+
+                <h3>crlf</h3>
+                <div>
+                    <em>STRING</em>
+                    <em>"" (a null-string)</em>
+                    Character(s) to append onto the end of each line of .css/.mixin-processed CSS.
+                </div>
+
+                <h3>async</h3>
+                <div>
+                    <em>BOOLEAN</em>
+                    <em>true</em>
+                    Specifies if <pre>LINK</pre> tags are to be processed asynchronously.
+                </div>
+
+                <h3>d1</h3>
+                <div>
+                    <em>STRING</em>
+                    <em>/*{{</em>
+                    Starting delimiter denoting embedded Javascript variables, e.g. <pre>color: <strong>/*{{</strong>mainColor}}/*</pre>.
+                </div>
+
+                <h3>d2</h3>
+                <div>
+                    <em>STRING</em>
+                    <em>}}*/</em>
+                    Ending delimiter denoting embedded Javascript variables, e.g. <pre>color: /*{{mainColor<strong>}}/*</strong></pre>.
+                </div>
+            </div>
+
+            <div style="clear: both; padding-top: 1%;">
+                <a name="*"></a>
+                * The <pre>IFRAME</pre>'s <pre>window.parent</pre> is set to <pre>null</pre>.
+            </div>
+
+            <a name="override"></a>
+            <h3>How To Override The Default Option Values</h3>
+            If you wish to override any of the default option values, you must include a Javascript code block like the one below <strong>before</strong> CjsSS.js's <pre>SCRIPT</pre> tag:
+            <blockquote>
+<pre>
+window.cjsss = {
+    options: {
+        <strong>key</strong>: <strong>value</strong>
+    }
+};
+</pre>
+            </blockquote>
+            Where <pre><strong>key</strong></pre> equals the option value you wish to reset and <pre><strong>value</strong></pre> equals the new default value.
+        </div>
+
+        
+        <div class="gettingstarted">
+            <h2>Getting Started</h2>
+
+            Assuming the default option values are in effect <a href="#options">as described above</a>:
+            <ol>
+                <li>
+                    <a href="https://github.com/campbeln/ngcss">Download CjsSS.js From GitHub</a>
+                </li>
+                <li>
+                    Include the CjsSS.js <pre>SCRIPT</pre>s in the <pre>HEAD</pre> of your HTML document <strong>below</strong> any <pre>LINK</pre> / <pre>STYLE</pre> tags you want to process:
+                    <blockquote>
+<pre>
+&lt;script type="text/javascript" src="<strong>js/cjsss-polyfill.js</strong>"&gt;&lt;/script&gt; <em class="comment">&lt;!-- IE6-7 support --&gt;</em>
+&lt;script type="text/javascript" src="<strong>js/cjsss.min.js</strong>"&gt;&lt;/script&gt;
+</pre>
+                    </blockquote>
+                </li>
+                <li>
+                    Add the <pre>cjsss</pre> attribute to the <pre>LINK</pre> and/or <pre>STYLE</pre> tags you want to process:
+                    <blockquote>
+<pre>
+&lt;link rel="stylesheet" type="text/css" href="css/site.css" <strong>cjsss</strong>&gt;
+&lt;style type="text/css" <strong>cjsss</strong>&gt;<em class="comment">...</em>&lt;/style&gt;
+</pre>
+                    </blockquote>
+                </li>
+                <li>
+                    Define the <a href="#options"><pre>options</pre></a> used by CjsSS.js (if any) using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON-style object definitions</a> (both keys and values are "double quoted"):
+                    <blockquote>
+<pre>
+&lt;style type="text/css" <strong>cjsss='{ "crlf": "\n" }'</strong>&gt;<em class="comment">...</em>&lt;/style&gt;
+&lt;link rel="stylesheet" type="text/css" href="css/site.css" <strong>cjsss='{ "crlf": "\n" }'</strong>&gt;
+</pre>
+                    </blockquote>
+                </li>
+                <li>
+                    Edit the CSS within the <pre>LINK</pre> and/or <pre>STYLE</pre> tags to use CjsSS.js like this:
+                    <blockquote>
+<pre>
+<em class="comment">/*<em class="script">&lt;script&gt;
+    var mainColor = 'blue';
+&lt;/script&gt;</em>*/</em>
+DIV {
+    color: <em class="comment">/*<em class="script ng">mainColor</em>*/</em>;
+}
+</pre>
+                    </blockquote>
+                </li>
+            </ol>
+            NOTE: You are also permitted to use the attribute name <pre>data-cjsss</pre> in place of <pre>cjsss</pre> if you want to be <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#data-*">HTML5 compliant</a>.
+        </div>
+
+        
+        <div class="gotchas">
+            <h2>Gotchas</h2>
+
+            <ul>
+                <li>
+                    If you are using the default <pre>autorun</pre> behavior of CjsSS.js then you will want to include the CjsSS.js <pre>SCRIPT</pre> reference after all <pre>cjsss</pre> attributed <pre>LINK</pre> / <pre>STYLE</pre> tags.
+                </li>
+                <li>
+                    As <pre>LINK</pre> tag CSS files are read via AJAX, the limitations of <a href="https://www.google.com/search?q=xmlhttprequest+cross+domain"><pre>XMLHttpRequest</pre></a> can restrict where you serve your CSS files from.
+                    If your CSS files exist on the same server, this is a non-issue.
+                </li>
+                <li>
+                    <pre>LINK</pre> tags are removed from the DOM, their CSS file contents are modified and placed within a new <pre>STYLE</pre> tag that is appended into the <pre>HEAD</pre>.
+                    This process can break some relative URLs within your CSS files (e.g. <pre>background-image: url("../img/a.png");</pre>).
+                    It is therefore recommended that you use absolute URLs within your CSS files (e.g. <pre>background-image: url("/img/a.png");</pre>) in order to avoid any such errors.
+                </li>
+                <li>
+                    Embedded <pre>SCRIPT</pre>s are all evaluated in series at initilization prior to CSS modification, so the following will not work as expected:
+                    <blockquote>
+<pre>
+<em class="comment">/*<em class="script">&lt;script&gt;
+    var mainColor = 'blue';
+&lt;/script&gt;</em>*/</em>
+DIV {
+    color: <em class="comment">/*<em class="script ng">mainColor</em>*/</em>; <em class="comment">/* expecting 'blue' but gets 'green' */</em>
+}
+
+<em class="comment">/*<em class="script">&lt;script&gt;
+    mainColor = 'green';
+&lt;/script&gt;</em>*/</em>
+SPAN {
+    color: <em class="comment">/*<em class="script ng">mainColor</em>*/</em>; <em class="comment">/* expecting 'green' */</em>
+}
+</pre>
+                    </blockquote>
+                    At initilization <pre>mainColor</pre> will be set to "blue" then "green" prior to any CSS modification, so the <pre>color</pre> of both DIV and SPAN will be set to "green".
+                </li>
+                <li>
+                    IE8+ is supported by CjsSS.js out-of-the-box, with support back to IE6 once <pre>document.querySelectorAll</pre> and <pre>JSON.parse</pre> functionality has been polyfilled via <pre>cjsss.polyfill.js</pre> or with <a href="http://www.jquery.com/">jQuery</a> (which is auto-magicially imported) included prior to CjsSS.js.
+                    The required "advanced" JavaScript functionality is:
+                    <ul>
+                        <li>
+                            <a href="https://developer.mozilla.org/en/docs/Web/API/Document.querySelectorAll">document.querySelectorAll</a>*, <pre>cjsss.polyfill.js</pre> or jQuery's <pre>$()</pre> (* - basic support in IE8 is sufficient)
+                        </li>
+                        <li>
+                            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON.parse</a>*, <pre>cjsss.polyfill.js</pre> or jQuery's <pre>$.parseJSON()</pre> (* - support from IE8)
+                        </li>
+                        <li>
+                            <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest">XMLHttpRequest</a> or IE6-7's <a href="http://toddmotto.com/writing-a-standalone-ajax-xhr-javascript-micro-library/">ActiveXObject</a>
+                        </li>
+                        <li>
+                            <a href="http://quirksmode.org/dom/core/#t12">getElementsByTagName</a>,
+                            <a href="http://quirksmode.org/dom/core/#t00">createElement</a>,
+                            <a href="http://quirksmode.org/dom/core/#t123">getAttribute</a>, and
+                            <a href="https://developer.mozilla.org/en-US/docs/Web/API/element.setAttribute">setAttribute</a> - 
+                            basic support in IE6-7 is sufficient
+                        </li>
+                        <!--
+                        <li>
+                            <a href="http://quirksmode.org/dom/core/#t125">hasAttribute</a>*  (* - support from IE8)
+                        </li>
+-->
+                        <li>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3>Side Effects</h3>
+            <ul>
+                <li>
+                    <pre>LINK</pre> tags are removed from the DOM, their CSS file contents are modified and placed within a new <pre>STYLE</pre> tag that is appended into the <pre>HEAD</pre>.
+                    This is done so that the original unprocessed CSS referenced by the <pre>LINK</pre> tag does not apply to the webpage.
+                </li>
+                <li>
+                    <strong>If you have elected to <pre>expose</pre> CjsSS.js</strong>, the <pre>window.cjsss</pre> object will be added under the global scope.
+                </li>
+                <li>
+                    <strong>If you have elected to have a <pre>scope</pre> of either <pre>global</pre> or <pre>local</pre></strong>, CjsSS.js-embedded Javascript has the ability to modify the global scope.
+                </li>
+                <li>
+                    <strong>If you have elected to have a <pre>scope</pre> of <pre>global</pre></strong>, the <pre>window.mixin</pre> function will be added under the global scope (though it will not overwright an existing <pre>window.mixin</pre> if one exists).
+                </li>
+                <li>
+                    And of course... the CSS within CjsSS.js attributed <pre>LINK</pre> and <pre>STYLE</pre> tags is modified based on the embedded Javascript.
+                </li>
+            </ul>
+        </div>
+
+
+        <div class="snake">
+            <h3>What is up with the snake?</h3>
+            <p>
+                Oh, you mean Cee & Jay? They are the mascots for CjsSS!
+            </p>
+            <p>
+                CjsSS (Cascading Javascript Style Sheet) is the union of two related web technologies joined seemlessly (unnaturally?) into one solution.
+                Thanks to the akwardness of the acronym (ending in three S's) it seemed reminisent of a snake's hiss.
+                So... "CSS and Javascript sss-ing"... "CJ hissing"... Hey! I need a two-headed snake!
+            </p>
+        </div>
+
+        <a name="about"></a>
+        <div class="about">
+            <img src="img/campbeln.png" style="left: 1%; width: 8%; position: absolute;" />
+            <form target="_top" method="post" action="https://www.paypal.com/cgi-bin/webscr">
+                <input type="hidden" value="_s-xclick" name="cmd">
+                <input type="hidden" value="7HPTRFK8W53M4" name="hosted_button_id">
+                <button class="donate" name="submit">Developer Tip Jar</button>
+                <img border="0" width="1" height="1" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" alt="">
+            </form>
+
+            <p>
+                CjsSS.js is a Vanilla-Javascript toolkit made by Nick Campbell, &copy; 2014.
+            </p>
+            <p>
+                CjsSS.js is released under the <a href="http://opensource.org/licenses/MIT">MIT License</a>. See the license.txt file in the <a href="https://github.com/campbeln/ngcss">source code</a> for copy permission.
+            </p>
+            <p>
+                Nick is a web nerd who likes to tinker in his spare time; CjsSS.js is a product of that tinkering.
+                Development is not supported by advertising nor the marketing of your email addresses.
+                If you find this code useful, please consider tossing a few dollars into the tip jar.
+                If you are a company that finds this code useful, please feel free to toss more than a few dollars into the tip jar ;)
+            </p>
+        </div>
+    </body>
+</html>
