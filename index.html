@@ -2,7 +2,7 @@
     <head>
         <title>CjsSS.js :: Cascading Javascript Style Sheets :: Next Generation CSS Preprocessor | Reprocessor</title>
         
-        <style type="text/css" cjsss='{ "scope": "global", "expose": true }'>
+        <style type="text/css" cjsss='{ "scope": "sandbox", "expose": true }'>
             /* Fonts */
             @font-face {
                 font-family: 'Comic Sans';
@@ -39,9 +39,73 @@
 
             /*
                 <script>
+                    window.cjsss.temp = window.cjsss.temp || {};
+
+                    var oCSS,
+                        oFonts = {
+                            Arial: 'arial',
+                            Helvetica: 'Helvetica',
+                            ComicSans: 'Comic Sans'
+                        },
+                        oColors = {
+                            lightBrown: '#b29782',
+                            brown: '#554233',       //# snake brown
+                            yellow: '#d4c668',
+                            green: '#469069',
+                            darkGreen: '#1b3e19',
+                            pink: '#c695cf',
+                            blue: '#182133',
+                            red: 'maroon',
+                            gray: '#eeeeee'
+                        },
+                        oColorSets = {
+                            blue: {
+                                backgroundColor: oColors.blue,
+                                color: "white",
+                                a: oColors.yellow
+                            },
+                            green: {
+                                backgroundColor: oColors.green,
+                                color: "white",
+                                a: oColors.yellow
+                            },
+                            brown: {
+                                backgroundColor: oColors.lightBrown,
+                                color: "black",
+                                a: oColors.red
+                            }
+                        }
+                    ;
+
+                    //# 
+                    oCSS = window.cjsss.temp.oCSS || {
+                        mainColor: oColors.yellow,
+                        $fonts: {
+                            pretty: oFonts.Helvetica,
+                            ugly: oFonts.ComicSans
+                        },
+                        splash: {
+                            h1_marginTop: "0.9%",
+                            h1_span_marginTop: "-1.7em"
+                        },
+                        about: {
+                            color: "black",
+                            a: oColors.red
+                        },
+                        highlight: oColors.yellow,
+                        overview: oColorSets.blue,
+                        gettingStarted: oColorSets.green,
+                        gotchas: oColorSets.brown
+                    };
+
+                    window.cjsss.temp = {
+                        oCSS: oCSS,
+                        oFonts: oFonts,
+                        oColors: oColors,
+                        oColorSets: oColorSets
+                    };
                 </script>
             */
-
 
             /* Site CSS */
             HTML, BODY, FORM {
@@ -65,7 +129,12 @@
             H3 {
                 font-family: /*{{oCSS.$fonts.pretty}}*/;
                 font-size: 200%;
-                margin: 1% 0 2% 0;
+                margin: 2% 0 2% 0;
+            }
+            H4 {
+                font-family: /*{{oCSS.$fonts.pretty}}*/;
+                font-size: 150%;
+                margin: 2% 0 2% 0;
             }
 
             A {
@@ -75,7 +144,6 @@
                 A:hover {
                     border-bottom: 1px solid /*{{oColors.red}}*/;
                 }
-
 
             SPAN.ugly {
                 font-family: /*{{oCSS.$fonts.ugly}}*/;
@@ -132,7 +200,6 @@
 
             PRE {
                 display: inline;
-                
                 padding: 1px;
             }
                 PRE.i {
@@ -309,63 +376,6 @@
         </style>
 
         <script>
-            var oCSS,
-                oFonts = {
-                    Arial: 'arial',
-                    Helvetica: 'Helvetica',
-                    ComicSans: 'Comic Sans'
-                },
-                oColors = {
-                    lightBrown: '#b29782',
-                    brown: '#554233',   // snake brown
-                    yellow: '#d4c668',
-                    green: '#469069',
-                    darkGreen: '#1b3e19',
-                    pink: '#c695cf',
-                    blue: '#182133',
-                    red: 'maroon',
-                    gray: '#eeeeee'
-                },
-                oColorSets = {
-                    blue: {
-                        backgroundColor: oColors.blue,
-                        color: "white",
-                        a: oColors.yellow
-                    },
-                    green: {
-                        backgroundColor: oColors.green,
-                        color: "white",
-                        a: oColors.yellow
-                    },
-                    brown: {
-                        backgroundColor: oColors.lightBrown,
-                        color: "black",
-                        a: oColors.red
-                    }
-                }
-            ;
-            
-            //# 
-            oCSS = {
-                mainColor: oColors.yellow,
-                $fonts: {
-                    pretty: oFonts.Helvetica,
-                    ugly: oFonts.ComicSans
-                },
-                splash: {
-                    h1_marginTop: "0.9%",
-                    h1_span_marginTop: "-1.7em"
-                },
-                about: {
-                    color: "black",
-                    a: oColors.red
-                },
-                highlight: oColors.yellow,
-                overview: oColorSets.blue,
-                gettingStarted: oColorSets.green,
-                gotchas: oColorSets.brown
-            };
-
             //# Safely converts "rgb(x,x,x)" into "#xxxxxx"
             function rgb2hex(rgb) {
                 if (/^#[0-9A-F]{6}$/i.test(rgb)) return rgb;
@@ -380,10 +390,14 @@
             //# 
             function mutateCSS($li) {
                 var i,
+                    oCSS = window.cjsss.temp.oCSS,
+                    oFonts = window.cjsss.temp.oFonts,
+                    oColors = window.cjsss.temp.oColors,
+                    oColorSets = window.cjsss.temp.oColorSets,
                     $cj = document.getElementById("cj"),
                     $ul = document.getElementById("demo").children
                 ;
-                
+
                 //# Traverse the $ul, removing .active as we go
                 for (i = 0; i < $ul.length; i++) {
                     $ul[i].className = "";
@@ -469,8 +483,8 @@
                 CjsSS (Cascading Javascript Style Sheet) is <a href="http://www.lesscss.org/">LESS</a> <a href="http://www.sass-lang.com/">SASS</a>y and more <a href="http://learnboost.github.io/stylus/">Stylus</a>h than the competition ;)
             </p>
             <ul class="cf">
-                <li><strong>Browser Support:</strong> IE8+ <em>(or IE6+ with optional cjsss.polyfill.js or <a href="http://www.jquery.com/">jQuery</a>)</em></li>
-                    <li><strong>Licensing Fees:</strong> $0, nada, nutin'.. but <a href="#about">Nick does accept tips</a>; licensed under the <a href="http://opensource.org/licenses/MIT">MIT License</a></li>
+                <li><a href="#browsersupport"><strong>Browser Support:</strong></a> IE8+ <em>(or IE6+ with optional cjsss.polyfill.js or <a href="http://www.jquery.com/">jQuery</a>)</em></li>
+                    <li><strong>Licensing Fees:</strong> $0, nada, nutin' (licensed under the <a href="http://opensource.org/licenses/MIT">MIT License</a>) but <a href="#about">Nick does accept tips</a></li>
                 <li><strong>Installation:</strong> n/a, just include <pre>cjsss.min.js</pre> <em>(<a href="http://nodejs.org/">Node.js</a> optional for server-side preprocessing)</em></li>
                     <li><strong>Tiny!</strong> Only ~3,300 bytes compressed</li>
 
@@ -523,8 +537,8 @@
                         </li>
                         <!--
                             <li>
-                                <pre class="i">object</pre> - isolated scope with the context (<pre>this</pre>) set to the provided <pre>object</pre>.
-                                Code is evaluated within a detached <pre>IFRAME</pre> with access to the provided <pre>object</pre> but with zero access to any of the host page's other resources.<a href="#*">*</a>
+                                <pre class="i">this</pre> - isolated scope with the context (<pre>this</pre>) set to the provided value.
+                                Code is evaluated within a detached <pre>IFRAME</pre> with access to the provided value but with zero access to any of the host page's other resources.<a href="#*">*</a>
                             </li>
                         -->
                         <li>
@@ -646,6 +660,7 @@
                 * The <pre>IFRAME</pre>'s <pre>window.parent</pre> is set to <pre>null</pre>.
             </div>
 
+
             <a name="override"></a>
             <h3>How To Override The Default Option Values</h3>
             If you wish to override any of the default option values, you must include a Javascript code block like the one below <strong>before</strong> CjsSS.js's <pre>SCRIPT</pre> tag:
@@ -671,11 +686,11 @@ window.cjsss = {
                     <a href="https://github.com/campbeln/ngcss">Download CjsSS.js From GitHub</a>
                 </li>
                 <li>
-                    Include the CjsSS.js <pre>SCRIPT</pre>s in the <pre>HEAD</pre> of your HTML document <strong>below</strong> any <pre>LINK</pre> / <pre>STYLE</pre> tags you want to process:
+                    Include the CjsSS.js <pre>SCRIPT</pre> tag(s) in the <pre>HEAD</pre> of your HTML document <strong>below</strong> any <pre>LINK</pre> / <pre>STYLE</pre> tags you want to process:
                     <blockquote>
 <pre>
-&lt;script type="text/javascript" src="<strong>js/cjsss-polyfill.js</strong>"&gt;&lt;/script&gt; <em class="comment">&lt;!-- IE6-7 support --&gt;</em>
-&lt;script type="text/javascript" src="<strong>js/cjsss.min.js</strong>"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="<strong>cjsss-polyfill.js</strong>"&gt;&lt;/script&gt; <em class="comment">&lt;!-- IE6-7 support --&gt;</em>
+&lt;script type="text/javascript" src="<strong>cjsss.min.js</strong>"&gt;&lt;/script&gt;
 </pre>
                     </blockquote>
                 </li>
@@ -712,6 +727,160 @@ DIV {
                 </li>
             </ol>
             NOTE: You are also permitted to use the attribute name <pre>data-cjsss</pre> in place of <pre>cjsss</pre> if you want to be <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes#data-*">HTML5 compliant</a>.
+
+
+            <h3>Advanced Configuration</h3>
+            If you want to change any of CjsSS.js's default functionality, you will first need to disable <pre>autorun</pre> and <pre>expose</pre> the <pre>window.cjsss</pre> object (NOTE: <pre>expose</pre> happens auto-magicially when you disable <pre>autorun</pre>) like so:
+            <blockquote>
+<pre>
+&lt;script&gt;
+    window.cjsss = {
+        options: {
+            <strong>selector</strong>: <strong>''</strong>, //# disables autorun
+            <strong>expose</strong>: <strong>true</strong>  //# exposes `window.cjsss`
+        }
+    };
+&lt;/script&gt;
+&lt;script type="text/javascript" src="<strong>cjsss.min.js</strong>"&gt;&lt;/script&gt; <!-- include CjsSS.js functionality -->
+</pre>
+            </blockquote>
+
+            When CjsSS.js is <pre>expose</pre>d, the following properties are made available under <pre>window.cjsss</pre>:
+            <ul>
+                <li>
+                    <pre>data</pre> exposes the internal variables utilized by the <pre>services</pre>:
+                    <ul>
+                        <li>
+                            <pre>cache</pre> stores the associative array that holds (amoung other things) the original <pre>innerHTML</pre> of the CjsSS.js processed <pre>LINK</pre> and <pre>STYLE</pre> tags, keyed by DOM reference.
+                        </li>
+                        <li>
+                            <pre>inject</pre> stores the associative array that holds the values added via <pre>cjsss.inject</pre>, keyed by the provided <pre>sVarName</pre>.
+                        </li>
+                        <li>
+                            <pre>services</pre> stores the unmodified default implementations of the internal services used by CjsSS.js.
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    The <pre>inject(sVarName, variant)</pre> function injects the provided <pre>variant</pre> into the evaluated Javascript code via the provided <pre>sVarName</pre>.
+                    This functionality allows you to expose any Javascript functionality you wish to the evaluated Javascript code.
+                    This call is always forwarded to the implementation present in <pre>services.inject</pre> so there is no need to reset this property.
+                </li>
+                <li>
+                    <pre>options</pre>* stores the default values as described in the <a href="#options">options section</a>.
+                </li>
+                <li>
+                    The <pre>process(vElements, oOptions)</pre> function processes the referenced <pre>vElements</pre> with preference to the provided <pre>oOptions</pre>.
+                    <pre>vElements</pre> can be of type <pre>string</pre> (as a CSS selector) or as an array-like collection of DOM element references (such as a <a href="https://developer.mozilla.org/en/docs/Web/API/NodeList">NodeList</a>, <a href="http://api.jquery.com/Types/#Object">jQuery object</a> or an <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>).
+                    <pre>oOptions</pre> is an <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/object"><pre>object</pre></a> describing the desired <a href="#options">options</a>.
+                    This call is always forwarded to the implementation present in <pre>services.process</pre> so there is no need to reset this property.
+                </li>
+                <li>
+                    <pre>services</pre>* stores the default implementations of the internal services used by CjsSS.js.
+                    Please <a href="https://github.com/campbeln/cjsss/blob/master/cjsss.js">view source code within <pre>cjsss.js</pre></a> for further details.
+                </li>
+                <li>
+                    <pre>version</pre> stores the version number of CjsSS.js that is being run.
+                </li>
+            </ul>
+            * - Any values set within these properties prior to <pre>expose</pre> being run are preserved in addition to any other properties not described above (e.g. <pre>window.cjsss.custom</pre> would be preserved).
+
+
+            <a name="custom"></a>
+            <h4>How To <pre>inject</pre> Custom Functionality</h4>
+            Continuing on from the code above to disable <pre>autorun</pre>, <pre>cjsss.inject</pre> can be used to expose any Javascript variable or value to your CjsSS.js evaluated Javascript code:
+            <blockquote>
+<pre>
+&lt;script&gt;
+    //# .inject a function named "invertColor"
+    <strong>cjsss.inject</strong>("invertColor", function(sHex) {
+        var r, g, b, sReturnVal;
+
+        if (sHex.length === 7 && sHex.indexOf('#') === 0) {
+            r = "0" + (255 - parseInt(sHex.substr(1, 2), 16)).toString(16);
+            g = "0" + (255 - parseInt(sHex.substr(3, 2), 16)).toString(16);
+            b = "0" + (255 - parseInt(sHex.substr(5, 2), 16)).toString(16);
+            sReturnVal = "#" + r.substr(-2) + g.substr(-2) + b.substr(-2);
+        }
+
+        return sReturnVal;
+    });
+
+    //# .inject an object named "userConfig"
+    var defaultColor = {
+        color: "green"
+    };
+    <strong>cjsss.inject</strong>("userConfig", defaultColor);
+
+    //# .inject an object named "span"
+    var spanCss = {
+        backgroundColor: "red"
+        subObject: defaultColor
+    };
+    <strong>cjsss.inject</strong>("span", spanCss);
+
+    //# .inject a string named "<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/text-transform">textTransform</a>"
+    <strong>cjsss.inject</strong>("textTransform", "capitalize");
+
+    //# Process the LINK / STYLE tags with a "cjsss" attribute and no oOptions
+    cjsss.process("[cjsss]", {});
+&lt;/script&gt;
+</pre>
+            </blockquote>
+            The code above exposes a function called "invertColor" to all CjsSS.js evaluated Javascript code like this:
+            <blockquote>
+<pre>
+/*
+    &lt;script&gt;
+        var sMainColor = "#cccccc";
+    &lt;/script&gt;
+*/
+div {
+    color: /*{{invertColor(sMainColor)}}*/;   //# invertColor returns '#333333'
+    text-transform: /*{{textTransform}}*/;    //# outputs 'capitalize'
+}                                             
+p {                                           
+    /*{{mixin(userConfig)}}*/                 //# outputs 'color: "green";'
+}                                             
+/*{{mixin(span, true)}}*/                     //# outputs 'span { background-color: "red"; color: "green"; }'
+</pre>
+            </blockquote>
+            
+
+
+            <a name="plugin"></a>
+            <h4>Plug-in Development and Overriding Internal Functionality</h4>
+            If you want to develop a plug-in or you need to override the default functionality of any aspect of CjsSS.js, you can do so via <pre>cjsss.servicesFactory</pre> or <pre>cjsss.services</pre>.
+
+            <p></p>
+            <pre>cjsss.services</pre> exposes all of the internal functionality of CjsSS.js, allowing every piece of functionality within CjsSS.js to be overridden.
+            Implementing a <pre>cjsss.servicesFactory</pre> under <pre>window.cjsss</pre> prior to including the CjsSS.js <pre>SCRIPT</pre> tag(s) allows you to override any <pre>cjsss.services</pre> functionality prior to CjsSS.js loading, or you can replace any of the functions under <pre>cjsss.services</pre> after CjsSS.js has been exposed via <pre>window.cjsss</pre>.
+
+            <p></p>
+            For example, if you wanted to override the <pre>expose</pre> functionality to make CjsSS.js available in a variable other than <pre>window.cjsss</pre>, you could do the following:
+            <blockquote>
+<pre>
+&lt;script&gt;
+    var newVar = null;
+
+    window.cjsss = {
+        options: {
+            <strong>expose</strong>: <strong>true</strong>  //# exposes CjsSS.js under `newVar`
+        },
+        servicesFactory: function ($cjsss) {
+            return {
+                expose: function() {
+                    newVar = $cjsss;
+                }
+            };
+        }
+    };
+&lt;/script&gt;
+&lt;script type="text/javascript" src="<strong>cjsss.min.js</strong>"&gt;&lt;/script&gt; <!-- include CjsSS.js functionality -->
+</pre>
+            </blockquote>
+
+
         </div>
 
         
@@ -739,47 +908,47 @@ DIV {
     var mainColor = 'blue';
 &lt;/script&gt;</em>*/</em>
 DIV {
-    color: <em class="comment">/*<em class="script ng">mainColor</em>*/</em>; <em class="comment">/* expecting 'blue' but gets 'green' */</em>
+    color: <em class="comment">/*<em class="script ng">mainColor</em>*/</em>; <em class="comment">//# expecting 'blue' but gets 'green'</em>
 }
 
 <em class="comment">/*<em class="script">&lt;script&gt;
     mainColor = 'green';
 &lt;/script&gt;</em>*/</em>
 SPAN {
-    color: <em class="comment">/*<em class="script ng">mainColor</em>*/</em>; <em class="comment">/* expecting 'green' */</em>
+    color: <em class="comment">/*<em class="script ng">mainColor</em>*/</em>; <em class="comment">//# expecting 'green'</em>
 }
 </pre>
                     </blockquote>
                     At initilization <pre>mainColor</pre> will be set to "blue" then "green" prior to any CSS modification, so the <pre>color</pre> of both DIV and SPAN will be set to "green".
                 </li>
                 <li>
+                    <a name="browsersupport"></a>
                     IE8+ is supported by CjsSS.js out-of-the-box, with support back to IE6 once <pre>document.querySelectorAll</pre> and <pre>JSON.parse</pre> functionality has been polyfilled via <pre>cjsss.polyfill.js</pre> or with <a href="http://www.jquery.com/">jQuery</a> (which is auto-magicially imported) included prior to CjsSS.js.
                     The required "advanced" JavaScript functionality is:
                     <ul>
                         <li>
-                            <a href="https://developer.mozilla.org/en/docs/Web/API/Document.querySelectorAll">document.querySelectorAll</a>*, <pre>cjsss.polyfill.js</pre> or jQuery's <pre>$()</pre> (* - basic support in IE8 is sufficient)
+                            <a href="https://developer.mozilla.org/en/docs/Web/API/Document.querySelectorAll">document.querySelectorAll</a>&dagger;, <pre>cjsss.polyfill.js</pre> or jQuery's <pre>$()</pre>
                         </li>
                         <li>
-                            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON.parse</a>*, <pre>cjsss.polyfill.js</pre> or jQuery's <pre>$.parseJSON()</pre> (* - support from IE8)
+                            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON.parse</a>&Dagger;, <pre>cjsss.polyfill.js</pre> or jQuery's <pre>$.parseJSON()</pre>
+                        </li>
+                        <li>
+                            <a href="http://quirksmode.org/dom/core/#t125">hasAttribute</a>&Dagger; is internally polyfilled to support back to IE6
                         </li>
                         <li>
                             <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest">XMLHttpRequest</a> or IE6-7's <a href="http://toddmotto.com/writing-a-standalone-ajax-xhr-javascript-micro-library/">ActiveXObject</a>
                         </li>
                         <li>
-                            <a href="http://quirksmode.org/dom/core/#t12">getElementsByTagName</a>,
-                            <a href="http://quirksmode.org/dom/core/#t00">createElement</a>,
-                            <a href="http://quirksmode.org/dom/core/#t123">getAttribute</a>, and
-                            <a href="https://developer.mozilla.org/en-US/docs/Web/API/element.setAttribute">setAttribute</a> - 
-                            basic support in IE6-7 is sufficient
-                        </li>
-                        <!--
-                        <li>
-                            <a href="http://quirksmode.org/dom/core/#t125">hasAttribute</a>*  (* - support from IE8)
-                        </li>
--->
-                        <li>
+                            <a href="http://quirksmode.org/dom/core/#t12">getElementsByTagName</a>*,
+                            <a href="http://quirksmode.org/dom/core/#t00">createElement</a>*,
+                            <a href="http://quirksmode.org/dom/core/#t123">getAttribute</a>*, and
+                            <a href="https://developer.mozilla.org/en-US/docs/Web/API/element.setAttribute">setAttribute</a>*
                         </li>
                     </ul>
+                    <div class="note">
+                        &dagger;, &Dagger; &nbsp; Functionality supported by IE8 (full&Dagger; or basic&dagger;) is sufficient.
+                        <br />* &nbsp; Basic support in IE6-7 is sufficient
+                    </div>
                 </li>
             </ul>
 
@@ -793,10 +962,10 @@ SPAN {
                     <strong>If you have elected to <pre>expose</pre> CjsSS.js</strong>, the <pre>window.cjsss</pre> object will be added under the global scope.
                 </li>
                 <li>
-                    <strong>If you have elected to have a <pre>scope</pre> of either <pre>global</pre> or <pre>local</pre></strong>, CjsSS.js-embedded Javascript has the ability to modify the global scope.
+                    <strong>If you have elected to have a <pre>scope</pre> of either <pre>global</pre>, <pre>local</pre> or <pre>this</pre></strong>, CjsSS.js-embedded Javascript has the ability to modify the global scope.
                 </li>
                 <li>
-                    <strong>If you have elected to have a <pre>scope</pre> of <pre>global</pre></strong>, the <pre>window.mixin</pre> function will be added under the global scope (though it will not overwright an existing <pre>window.mixin</pre> if one exists).
+                    <strong>If you have elected to have a <pre>scope</pre> of <pre>global</pre></strong>, the <pre>window.mixin</pre> function will be added under the global scope (though it will not overwrite an existing <pre>window.mixin</pre> if one exists).
                 </li>
                 <li>
                     And of course... the CSS within CjsSS.js attributed <pre>LINK</pre> and <pre>STYLE</pre> tags is modified based on the embedded Javascript.
@@ -808,12 +977,12 @@ SPAN {
         <div class="snake">
             <h3>What is up with the snake?</h3>
             <p>
-                Oh, you mean Cee & Jay? They are the mascots for CjsSS!
+                Oh, you mean Cee & Jay? They are the mascots for CjsSS.js!
             </p>
             <p>
-                CjsSS (Cascading Javascript Style Sheet) is the union of two related web technologies joined seemlessly (unnaturally?) into one solution.
-                Thanks to the akwardness of the acronym (ending in three S's) it seemed reminisent of a snake's hiss.
-                So... "CSS and Javascript sss-ing"... "CJ hissing"... Hey! I need a two-headed snake!
+                CjsSS (<em>cee-JAY-hiss</em> or Cascading Javascript Style Sheet) is the union of two related web technologies joined seemlessly (unnaturally?) into one solution.
+                Thanks to the akwardness of the acronym (ending in three S's) it seemed reminisent of a snake's hiss...
+                <em>"CSS and Javascript sss-ing"</em>... <em>"CJ hiss"</em>... Hey! I need a two-headed snake!
             </p>
         </div>
 
@@ -831,13 +1000,13 @@ SPAN {
                 CjsSS.js is a Vanilla-Javascript toolkit made by Nick Campbell, &copy; 2014.
             </p>
             <p>
-                CjsSS.js is released under the <a href="http://opensource.org/licenses/MIT">MIT License</a>. See the license.txt file in the <a href="https://github.com/campbeln/ngcss">source code</a> for copy permission.
+                CjsSS.js is released under the <a href="http://opensource.org/licenses/MIT">MIT License</a>. See the license.txt file in the <a href="https://github.com/campbeln/cjsss">source code</a> for copy permission.
             </p>
             <p>
                 Nick is a web nerd who likes to tinker in his spare time; CjsSS.js is a product of that tinkering.
                 Development is not supported by advertising nor the marketing of your email addresses.
-                If you find this code useful, please consider tossing a few dollars into the tip jar.
-                If you are a company that finds this code useful, please feel free to toss more than a few dollars into the tip jar ;)
+                If you find this code useful, please consider tossing a few dollars into my tip jar.
+                If you are a company that finds this code useful, please feel free to toss more than a few dollars into my tip jar ;)
             </p>
         </div>
     </body>
