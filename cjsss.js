@@ -9,21 +9,40 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
 (function ($win, $doc, fnEvalFactory) {
     "use strict";
 
-    var $services = {},
-        oCache = {},
-        cjsss = "cjsss",
-        sVersion = "0.1b",
-        bExposed = false,
+    var bExposed = false,
         $head = ($doc.head || $doc.getElementsByTagName("head")[0]),
-        oDefaults = {
-            selector: "[" + cjsss + "], [data-" + cjsss + "]",      //# STRING (CSS Selector);
-            optionScope: "json",                                    //# STRING (enum: json, global, local, object, sandbox); 
-            expose: false,                                          //# BOOLEAN; Set window.cjsss?
-            async: true,                                            //# BOOLEAN; Process LINK tags asynchronously?
-            scope: "sandbox",                                       //# STRING (enum: global, local, object, sandbox); Javascript scope to evaluate code within.
-            crlf: "",                                               //# STRING; Character(s) to append to the end of each line of `mixin`-processed CSS.
-            d1: "/*{{", d2: "}}*/"                                  //# STRING; Delimiters denoting embedded Javascript variables (d1=start, d2=end).
-        }
+        cjsss = "cjsss",
+        $cjsss = {
+            options: {
+                selector: "[" + cjsss + "], [data-" + cjsss + "]",      //# STRING (CSS Selector);
+                optionScope: "json",                                    //# STRING (enum: json, global, local, object, sandbox); 
+                expose: false,                                          //# BOOLEAN; Set window.cjsss?
+                async: true,                                            //# BOOLEAN; Process LINK tags asynchronously?
+                scope: "sandbox",                                       //# STRING (enum: global, local, object, sandbox); Javascript scope to evaluate code within.
+                crlf: "",                                               //# STRING; Character(s) to append to the end of each line of `mixin`-processed CSS.
+                d1: "/*{{", d2: "}}*/"                                  //# STRING; Delimiters denoting embedded Javascript variables (d1=start, d2=end).
+            },
+            services: {},
+
+            version: "0.1.1b",
+            data: {
+                services: {},
+                inject: {},
+                cache: {}
+            },
+
+            //#     NOTE: We implement .process and .inject with .apply below to ensure that these calls are always routed to the version under $win[cjsss].services (else a developer updating $win[cjsss].services.process would also have to update $win[cjsss].process)
+            process: function () {
+                $cjsss.services.process.apply(this, arguments);
+            },
+            inject: function () {
+                $cjsss.services.inject.apply(this, arguments);
+            }
+        },
+        oDefaults = $cjsss.options,         //# Include these alias variables for improved code minimization
+        $services = $cjsss.services,
+        oCache = $cjsss.data.cache,
+        oInjections = $cjsss.data.inject
     ;
 
 
@@ -39,7 +58,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             $services.expose();
         }
     };
-
+    
 
     //# DOM querying functionality (defaulting to jQuery if it's present on-page)
     //#     NOTE: Include cjsss.polyfill.js or jQuery to support document.querySelectorAll on IE7 and below, see: http://quirksmode.org/dom/core/ , http://stackoverflow.com/questions/20362260/queryselectorall-polyfill-for-all-dom-nodes
@@ -54,23 +73,12 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
     //# Exposes our functionality under the $win(dow)
     $services.expose = function () {
         //# If we've not yet been bExposed
-        //#     TODO: Do we need the bExposed test?
         if (!bExposed) {
             bExposed = true;
 
-            //# .extend the current $win[cjsss] (if any) with the internal values
-            //#     NOTE: We implement process with .apply below to ensure that $win[cjsss].process() calls are always routed to the version under $win[cjsss].services (else a developer updating $win[cjsss].services.process would also have to update $win[cjsss].process)
-            $win[cjsss] = $services.extend({
-                options: oDefaults,
-                services: $services,
-                version: sVersion,
-                process: function () {
-                    $win[cjsss].services.process.apply(this, arguments);
-                },
-                mixin: function () {
-                    $win[cjsss].services.mixinFactory("").apply(this, arguments);
-                }
-            }, $win[cjsss]);
+            //# .extend the current $win[cjsss] (if any) with the internal $cjsss, resetting both to the new .extend'ed object
+            //#     NOTE: oDefaults and $services are .extended in the procedural code below, so there is no need to so it again here
+            $cjsss = $win[cjsss] = $services.extend($win[cjsss], $cjsss);
         }
     }; //# $services.expose
 
@@ -89,7 +97,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
         for (i = 1; i < arguments.length; i++) {
             if ($services.is.obj(arguments[i])) {
                 for (sKey in arguments[i]) {
-                    if (oTarget.hasOwnProperty(sKey)) {
+                    if (arguments[i].hasOwnProperty(sKey)) {
                         oTarget[sKey] = ($services.is.obj(arguments[i][sKey])
                             ? $services.extend(oTarget[sKey], arguments[i][sKey])
                             : arguments[i][sKey]
@@ -136,16 +144,44 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             //# NOTE: This function also treats a 0-length string (null-string) as a non-string
             return ((typeof s === 'string' || s instanceof String) && s !== '');
         },
-        obj: function(o) {
-            return (o && o === Object(o));
-        },
         fn: function (f) {
             return (Object.prototype.toString.call(f) === '[object Function]');
         },
-        arr: function(a) {
+        obj: function (o) {
+            return (o && o === Object(o) && !$services.is.fn(o));
+        },
+        arr: function (a) {
             return (Object.prototype.toString.call(a) === '[object Array]');
         }
     };
+
+
+    //# Injects the passed variant (exposed as the passed sVarName) to all non-JSON eval'uated code
+    $services.inject = function (sVarName, variant) {
+        var bReturnVal = $services.is.str(sVarName);
+        if (bReturnVal) {
+            oInjections[sVarName] = variant;
+        }
+        return bReturnVal;
+    };
+    /*
+    //# The version below has been religated to the "too hard" basket, as external script references added into the $iFrame would need to be hooked to verify .onload before the eval's could be run, and while there are cross-browser ways to do this, they are not very nice or short. Besides, the developer could implement one of the documented ways to accomplish this themselves (likely a good plugin candidate).
+    $services.inject = function (str, variant) {
+        var reScript = /^(\s)*?<script .*?>(\s)*?$/i,
+            bReturnVal = $services.is.str(str)
+        ;
+
+        //# If the passed str is.str, determine if it's a .scripts request or a .vars request
+        if (bReturnVal) {
+            (reScript.test(str) && variant === undefined
+                ? oInjections.scripts.push(str)
+                : oInjections.vars[str] = variant
+            )
+        }
+
+        return bReturnVal;
+    };
+    */
 
 
     //# Returns the mixin function
@@ -218,16 +254,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
         var i, $current, sAttrName,
             $elements = [],
             o = $services.extend({}, oDefaults, oOptions),
-            eOptionScope = o.optionScope,
-            updateCss = function($style, sCss, o) {
-                //# If this is IE8 or below we'll have a .styleSheet (and .styleSheet.cssText) to set sCss into, else we can use .innerHTML, see: http://stackoverflow.com/questions/9250386/trying-to-add-style-tag-using-javascript-innerhtml-in-ie8 , http://www.quirksmode.org/dom/html/#t00 , http://stackoverflow.com/questions/5618742/ie-8-and-7-bug-when-dynamically-adding-a-stylesheet , http://jonathonhill.net/2011-10-12/ie-innerhtml-style-bug/
-                //#     TODO: Test in IE8-
-                if ($style.styleSheet) {
-                    $style.styleSheet.cssText = $services.processCss(sCss, o);
-                } else {
-                    $style.innerHTML = $services.processCss(sCss, o);
-                }
-            }
+            eOptionScope = o.optionScope
         ;
 
         //# If a truthy vElements was passed
@@ -250,15 +277,15 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
         //# Traverse the $elements (if any)
         for (i = 0; i < $elements.length; i++) {
             //# Reset the values for this loop
-            //#     NOTE: .hasAttribute is IE8+ only, hence the or'ed $services call below
             $current = $elements[i];
-            sAttrName = ( ($current.hasAttribute || $services.hasAttribute($current))("data-" + cjsss) ? "data-" : "" ) + cjsss;
+            $current.hasAttribute = $current.hasAttribute || $services.hasAttribute($current);  //# .hasAttribute is IE8+ only, hence the polyfill
+            sAttrName = ($current.hasAttribute("data-" + cjsss) ? "data-" : "") + cjsss;
             o = $services.extend({},
                 oDefaults,
                 $services.evalFactory.create(eOptionScope)($current.getAttribute(sAttrName) || ""),
                 oOptions
             );
-
+            
             //# If we have been told to .expose ourselves, so do now (before we run any code below)
             if (o.expose) {
                 $services.expose();
@@ -268,10 +295,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             //#     NOTE: We utilize the oCache below so that we can re-process the CSS if requested, else we loose the original value when we reset innerHTML
             switch ($current.tagName.toLowerCase()) {
                 case "style": {
-                    //# Modify the $current style tag while adding it to the oCache
-                    oCache[$current] = oCache[$current] || $current.innerHTML;
-                    //$current.innerHTML = $services.processCss(oCache[$current], o);
-                    updateCss($current, oCache[$current], o);
+                    $services.processStyle($current, o);
                     break;
                 }
                 case "link": {
@@ -279,13 +303,11 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                     //#     NOTE: We use .href rather than .getAttribute("href") because .href is a fully qualified URI while .getAttribute returns the set string
                     $services.get($current.href, o.async, {
                         fn: function (sCss, oData) {
+                            //# Setup the new $style tag
                             var $style = $doc.createElement('style');
-
-                            //# Setup the new $style tag and its oCache
                             $style.setAttribute("type", "text/css"); //# $style.type = "text/css";
                             $style.setAttribute(oData.attr, oData.$link.getAttribute(oData.attr) || "");
-                            oCache[$style] = sCss;
-                            updateCss($style, sCss, o);
+                            $services.processStyle($style, o, sCss);
 
                             //# Remove the .$link then append the new $style element under our $head
                             oData.$link.parentNode.removeChild(oData.$link);
@@ -302,42 +324,82 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
     }; //# $services.process()
 
 
-    //# Processes the passed sCss using the provided oOptions
-    $services.processCss = function (sCss, oOptions) {
-        var reScript = /<script.*?>([\s\S]*?)<\/script>/gi,
+    //# Processes the passed $style tag using the provided oOptions
+    $services.processStyle = function ($style, oOptions, sCss) {
+        var oContext, sMode,
+            reScript = /<script.*?>([\s\S]*?)<\/script>/gi,
             reDeScript = /<[\/]?script.*?>/gi,
-            reScriptSrc = /<script.*?src=['"](.*?)['"].*?>/i,
-            fnEvaler = $services.evalFactory.create(
-                $services.evalFactory.context(oOptions.scope)
-            ),
-            fnMixin = $services.mixinFactory(oOptions.crlf)
+            reScriptSrc = /<script.*?src=['"](.*?)['"].*?>/i
         ;
+
+        //# If the oCache hasn't been setup yet for this $style tag
+        if (!oCache[$style]) {
+            oContext = $services.evalFactory.context(oOptions.scope);
+            sCss = sCss || $style.innerHTML;
+
+            //# Setup the oCache entry for this $style tag
+            oCache[$style] = {
+                css: sCss,
+                mode: oContext.mode,
+                evaler: $services.evalFactory.create(oContext.context)
+            };
+
+            //# If we are supposed to .expose ourselves and we just setup a s(andbox), .inject $cjsss now
+            if (oOptions.expose && oContext.mode === "s") {
+                $services.inject(cjsss, $cjsss);
+            }
+        }
+
+        //# Collect the sMode and sCss from the oCache (now that we know it's setup fully)
+        sMode = oCache[$style].mode;
+        sCss = oCache[$style].css;
+
+        //# Rebuild the .mixinFactory with the supplied .crlf, re-.inject'ing it into our oInjections
+        $services.inject("mixin", $services.mixinFactory(oOptions.crlf));
+
+        //$services.inject("invertColor", function (sHex) {
+        //    var r, g, b, sReturnVal;
+
+        //    if (sHex.length === 7 && sHex.indexOf('#') === 0) {
+        //        r = "0" + (255 - parseInt(sHex.substr(1, 2), 16)).toString(16);
+        //        g = "0" + (255 - parseInt(sHex.substr(3, 2), 16)).toString(16);
+        //        b = "0" + (255 - parseInt(sHex.substr(5, 2), 16)).toString(16);
+        //        sReturnVal = "#" + r.substr(-2) + g.substr(-2) + b.substr(-2);
+        //    }
+
+        //    return sReturnVal;
+        //});
 
         //# Form a closure around the logic to ensure the variables are not garbage collected during async calls
         //#     NOTE: I have no idea why this was occurring and this closure may not be necessary (a_sJS was being set to null). Seemed to be due to parallel calls squashing each others function vars(?!). Maybe function variables are not new'd per invocation?
         //#     TODO: Find out why this error was occuring and remove closure if it's not necessary
         //#     TODO: Look into tokenizing sCss as we go so SCRIPTs and tokens are processed in series rather than SCRIPTs then tokens as currently implemented
         return (function () {
-            var a_sToken, $src, sReturnVal, i,
-                a_sJS = sCss.match(reScript) || [],
+            var a_sToken, $src, sProcessedCss, i,
+                a_sJS = [],
                 a_sTokenized = sCss.replace(reScript, "").split(oOptions.d1)
             ;
 
-            //# Traverse the extracted SCRIPT tags from the sCss (if any)
-            for (i = 0; i < a_sJS.length; i++) {
-                $src = reScriptSrc.exec(a_sJS[i]);
+            //# If we just setup the oCache (as indicated by a non-undefined oContext) or we are in a .mode that we need to reprocess the SCRIPTs each time because they fall out of scope
+            if (oContext || sMode === "l" || sMode === "t") {
+                a_sJS = sCss.match(reScript) || [];
 
-                //# If there is an $src in the SCRIPT tag, .get the resulting js synchronously (as order of SCRIPTs matters) 
-                if ($src && $src[1]) {
-                    $services.get($src[1], false, {
-                        fn: function (js) {
-                            a_sJS[i] = js;
-                        }
-                    });
-                }
-                    //# Else this is an inline SCRIPT tag, so load the local reDeScript'd code into the a_sJS eval stack
-                else {
-                    a_sJS[i] = a_sJS[i].replace(reDeScript, "");
+                //# Traverse the extracted SCRIPT tags from the sCss (if any)
+                for (i = 0; i < a_sJS.length; i++) {
+                    $src = reScriptSrc.exec(a_sJS[i]);
+
+                    //# If there is an $src in the SCRIPT tag, .get the resulting js synchronously (as order of SCRIPTs matters) 
+                    if ($src && $src[1]) {
+                        $services.get($src[1], false, {
+                            fn: function (js) {
+                                a_sJS[i] = js;
+                            }
+                        });
+                    }
+                        //# Else this is an inline SCRIPT tag, so load the local reDeScript'd code into the a_sJS eval stack
+                    else {
+                        a_sJS[i] = a_sJS[i].replace(reDeScript, "");
+                    }
                 }
             }
 
@@ -355,20 +417,26 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                 };
             }
 
-            //# Now that we have fully populated our a_sJS eval stack, process it while passing in the fnMixin as our oImport
-            a_sJS = fnEvaler(a_sJS, { mixin: fnMixin });
+            //# Now that we have fully populated our a_sJS eval stack, process it while passing in the oInjections
+            a_sJS = oCache[$style].evaler(a_sJS, oInjections);
 
-            //# Set the first index of a_sTokenized into our sReturnVal then traverse the rest of the a_sTokenized sCss, rebuilding it as we go
+            //# Set the first index of a_sTokenized into sProcessedCss then traverse the rest of the a_sTokenized sCss, rebuilding it as we go
             //#     NOTE: Since we are splitting on .d(elimiter)1, the first index of a_sTokenized represents the STYLE before the first /*{{var}}*/ so we don't process it and simply set it as the start of our sReturnVal
-            sReturnVal = a_sTokenized[0];
+            sProcessedCss = a_sTokenized[0];
             for (i = 1; i < a_sTokenized.length; i++) {
                 //# Pull the result of the eval from a_sJS at the recorded .i(ndex) and append the tralining sCss .s(tring)
-                sReturnVal += a_sJS[a_sTokenized[i].i] + a_sTokenized[i].s;
+                sProcessedCss += a_sJS[a_sTokenized[i].i] + a_sTokenized[i].s;
             }
 
-            return sReturnVal;
+            //# If this is IE8 or below we'll have a .styleSheet (and .styleSheet.cssText) to set sCss into, else we can use .innerHTML, see: http://stackoverflow.com/questions/9250386/trying-to-add-style-tag-using-javascript-innerhtml-in-ie8 , http://www.quirksmode.org/dom/html/#t00 , http://stackoverflow.com/questions/5618742/ie-8-and-7-bug-when-dynamically-adding-a-stylesheet , http://jonathonhill.net/2011-10-12/ie-innerhtml-style-bug/
+            //#     TODO: Test in IE8-
+            if ($style.styleSheet) {
+                $style.styleSheet.cssText = sProcessedCss;
+            } else {
+                $style.innerHTML = sProcessedCss;
+            }
         })();
-    }; //# $services.processCss
+    }; //# $services.processStyle
 
 
     //# Safely warns the user on the console
@@ -382,18 +450,21 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
     //####################
     //# "Procedural" code
     //####################
-    //# Before importing any external functionality, copy the $service function references into the ._core
-    $services._core = $services.extend({}, $services);
+    //# Before importing any external functionality, copy the original $service function references into .data.services
+    $cjsss.data.services = $services.extend({}, $services);
     
     //# If the developer has already setup a $win[cjsss] object
-    //#     NOTE: This first call to .is.obj (below) is the only non-overridable piece of code in CjsSS!
+    //#     NOTE: These first calls to .is.obj, .is.fn and .extend are the only non-overridable pieces of code in CjsSS!
     if ($services.is.obj($win[cjsss])) {
-        //# .extend our oDefaults and $services (after first overriding .extend if there is a developer-implemented version)
-        $services.extend = ($win[cjsss].services && $win[cjsss].services.extend ? $win[cjsss].services.extend : $services.extend);
-        $services.extend($services, $win[cjsss].services);
+        //# If the developer has provided a servicesFactory, .extend it's results over our own $services
+        if ($services.is.fn($win[cjsss].servicesFactory)) {
+            $services.extend($services, $win[cjsss].servicesFactory($cjsss));
+        }
+
+        //# .extend any developer .options over our oDefaults
         $services.extend(oDefaults, $win[cjsss].options);
     }
-
+    
     //# Build the passed fnEvalFactory (if one hasn't been set already)
     //#     NOTE: The fnEvalFactory is specifically placed outside of the "use strict" block to allow for the local eval calls below to persist across eval'uations
     $services.evalFactory = $services.evalFactory || fnEvalFactory($win, $doc, $services);
@@ -404,6 +475,8 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
     window,
     document,
     (function(fnLocalEvaler) {
+        //# SCRIPT tag versus eval - http://stackoverflow.com/questions/8380204/is-there-a-performance-gain-in-including-script-tags-as-opposed-to-using-eval
+        //# and... http://jsperf.com/dynamic-script-tag-with-src-vs-xhr-eval-vs-xhr-inline-s/4
         return function ($win, $doc, $services) {
             var fnGEval;
 
@@ -431,40 +504,63 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             //}
 
 
-            //# Returns an object reference based on the passed e(num)
-            function context(e) {
-                //# Determine the first character of the passed e(num) and process accordingly
-                switch ((e + "").substr(0, 1).toLowerCase()) {
-                    case "g": { //# global
-                        return $win;
+            //# Returns an object reference based on the passed eMode
+            //#     TODO: this should be under a sandbox with the object injected
+            function context(eMode, oContext) {
+                //# If the passed eMode is a string
+                if ($services.is.str(eMode)) {
+                    //# Determine the first character of the passed eMode and process accordingly
+                    switch (eMode.substr(0, 1).toLowerCase()) {
+                        case "g": { //# global
+                            return { context: $win, mode: "g" };
+                        }
+                        case "l": { //# local
+                            return { context: null, mode: "l" };
+                        }
+                        case "t": { //# this & thislocal
+                            //# If this is a thislocal request, we need to wireup .inContext under a new $sandbox
+                            if (eMode === "thislocal") {
+                                var $sandbox = createSandbox();
+                                $sandbox.$sandbox.inContext = function (s) { $sandbox.$sandbox.local.call(oContext, s); };
+                                return { context: $sandbox, mode: "l" };
+                            }
+                            //# 
+                            else {
+                                return { context: oContext, mode: "t" };
+                            }
+
+                            //# createSandbox() for thislocal or set as oContext depending on the eMode
+                            return (eMode === "thislocal"
+                                ? { context: createSandbox(oContext), mode: "l" }
+                                : { context: oContext, mode: "t" }
+                            );
+                        }
+                        case "j": { //# json
+                            return { context: JSON.parse, mode: "j" };
+                        }
+                        //case "s": //# sandbox
+                        default: {
+                            return { context: createSandbox(), mode: "s" };
+                        }
                     }
-                    case "l": { //# local
-                        return null;
-                    }
-                    case "j": { //# json
-                        return JSON.parse;
-                    }
-                    case "o": { //# object; this one is silly as the caller should pass in an object rather than "object", else `this` is simply set to this blank object
-                        return {};
-                    }
-                    //case "s": //# sandbox
-                    default: {
-                        return createSandbox();
-                    }
+                }
+                //# Else we assume eMode is the oContext of a t(his) request
+                else {
+                    return { context: eMode, mode: "t" }
                 }
             }
             
 
-            //# Merges the passed oImport into the oContext (left-most wins)
-            //#     NOTE: If a sKey already exists in the oContext, its value takes precedence over the one in oImport, hence "merge" rather than "extend"
+            //# Merges the passed oInject into the oContext (left-most wins)
+            //#     NOTE: If a sKey already exists in the oContext, its value takes precedence over the one in oInject, hence "merge" rather than "extend"
             //#     NOTE: We assume that oContext is an object
-            function merge(oContext, oImport) {
-                //# If the passed oImport .is.obj
-                if ($services.is.obj(oImport)) {
-                    //# Traverse the oImport (if any), importing any unique sKeys into the oContext
-                    for (var sKey in oImport) {
-                        if (oImport.hasOwnProperty(sKey)) {
-                            oContext[sKey] = oContext[sKey] || oImport[sKey];
+            function merge(oContext, oInject) {
+                //# If the passed oInject .is.obj
+                if ($services.is.obj(oInject)) {
+                    //# Traverse the oInject'ions (if any), importing any unique sKeys into the oContext
+                    for (var sKey in oInject) {
+                        if (oInject.hasOwnProperty(sKey)) {
+                            oContext[sKey] = oContext[sKey] || oInject[sKey];
                         }
                     }
                 }
@@ -488,8 +584,10 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                 //# .write the SCRIPT out to the $iFrame (which implicitly runs the code) then remove the $iFrame from the $dom
                 oReturnVal.document.write(
                     "<script>" +
-                        "window.$eval = function(){" + globalEvalFn() + "}();" +
-                        "window.$sandbox=true;" +
+                        "window.$sandbox={" +
+                            "global: function(){" + globalEvalFn() + "}()," +
+                            "local: function(s){return eval(s);}" +
+                        "};" +
                         "parent=null;" +
                     "<\/script>"
                 );
@@ -504,24 +602,27 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             function factory(vContext, fnFallback) {
                 //# If the passed vContext is a string, convert it into the appropriate object
                 if ($services.is.str(vContext)) {
-                    vContext = context(vContext);
+                    vContext = context(vContext).context;
                 }
 
                 //# Ensure the passed fnFallback is a function
                 fnFallback = ($services.is.fn(fnFallback) ? fnFallback : function (s) {
-                    $services.warn("Unable to collect requested `eval`, defaulting to local `eval`.");
-                    return eval(s);
+                    $services.warn("Unable to collect requested `eval`, defaulting to the local `eval`.");
+                    return (vContext && vContext.$sandbox && $services.is.fn(vContext.$sandbox.local)
+                        ? vContext.$sandbox.local(s)
+                        : eval(s)
+                    );
                 });
 
                 //# Return the eval'ing function to the caller
-                return function (js, oImport) {
+                return function (js, oInject) {
                     var i,
                         a_sReturnVal = [],
                         bReturnArray = $services.is.arr(js),
                         oLocal = {
                             js: js,
                             returnVals: a_sReturnVal,
-                            imports: oImport,
+                            inject: oInject,
                             key: ""
                         }
                     ;
@@ -532,37 +633,9 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                         oLocal.js = js = [js];
                     }
 
-                    //# If this is a global context call
-                    if (vContext === $win) {
-                        //# If the global version of eval hasn't been collected yet, get it now (defaulting to the fnFallback if there are any issues)
-                        //#     NOTE: A function defined by a Function() constructor does not inherit any scope other than the global scope (which all functions inherit), even though we are not using this paticular feature (as globalEvalFn get's the global version on eval)
-                        if (!fnGEval) {
-                            fnGEval = new Function(globalEvalFn())() || fnFallback;
-                        }
-
-                        //# Merge the oImport into the vContext
-                        merge(vContext, oImport);
-
-                        //# Traverse the js array, eval'ing each entry as we go (placing the result into the corresponding index within our a_sReturnVal)
-                        for (i = 0; i < js.length; i++) {
-                            a_sReturnVal.push(fnGEval(js[i]));
-                        }
-                    }
-                    //# Else if this is a sandbox call
-                    else if (vContext.$sandbox === true) {
-                        //# Ensure the .$eval is setup (defaulting to the fnFallback if there are any issues)
-                        vContext.$eval = vContext.$eval || fnFallback;
-
-                        //# Merge the oImport into the vContext
-                        merge(vContext, oImport);
-
-                        //# Traverse the js array, eval'ing each entry as we go (placing the result into the corresponding index within our a_sReturnVal)
-                        for (i = 0; i < js.length; i++) {
-                            a_sReturnVal.push(vContext.$eval(js[i]));
-                        }
-                    }
-                    //# Else if this is a JSON.parse call
-                    else if (vContext === JSON.parse) {
+                    //# If this is a JSON.parse call
+                    //#     NOTE: This is placed at the top as the it is the default parser for in-line options (so it will likely be called the most)
+                    if (vContext === JSON.parse) {
                         //# Ensure JSON.parse is setup (defaulting to the fnFallback if there are any issues)
                         JSON.parse = JSON.parse || fnFallback;
 
@@ -571,24 +644,57 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                             a_sReturnVal.push(JSON.parse(js[i]));
                         }
                     }
-                    //# Else if the caller passed in a vanilla object, .call fnLocalEvaler with the vContext
+                    //# Else if this is a global context call
+                    else if (vContext === $win) {
+                        //# If the global version of eval hasn't been collected yet, get it now (defaulting to the fnFallback if there are any issues)
+                        //#     NOTE: A function defined by a Function() constructor does not inherit any scope other than the global scope (which all functions inherit), even though we are not using this paticular feature (as globalEvalFn get's the global version on eval)
+                        if (!fnGEval) {
+                            fnGEval = new Function(globalEvalFn())() || fnFallback;
+                        }
+
+                        //# Merge the oInject into the vContext
+                        merge(vContext, oInject);
+
+                        //# Traverse the js array, eval'ing each entry as we go (placing the result into the corresponding index within our a_sReturnVal)
+                        for (i = 0; i < js.length; i++) {
+                            a_sReturnVal.push(fnGEval(js[i]));
+                        }
+                    }
+                    //# Else if the caller passed in another kind of object
                     else if ($services.is.obj(vContext)) {
-                        fnLocalEvaler.call(vContext, oLocal);
+                        //# If this is a sandbox call
+                        if (vContext.$sandbox) {
+                            //# Reuse oLocal to grab a reference to .$sandbox's eval functionality (defaulting to .inContext first if its been setup and fnFall(ing)back if necessary)
+                            //#     NOTE: .inContext is setup as as additional evaluation function outside of .createSandbox for "this" calls, so we need to use it first
+                            oLocal = vContext.$sandbox.inContext || vContext.$sandbox.global || fnFallback;
+
+                            //# Merge the oInject into the vContext
+                            merge(vContext, oInject);
+
+                            //# Traverse the js array, eval'ing each entry as we go (placing the result into the corresponding index within our a_sReturnVal)
+                            for (i = 0; i < js.length; i++) {
+                                a_sReturnVal.push(oLocal(js[i]));
+                            }
+                        }
+                        //# Else .call fnLocalEvaler with the vContext
+                        else {
+                            fnLocalEvaler.call(vContext, oLocal);
+                        }
                     }
                     //# Else assume this is a local context call (as no valid vContext was passed in), make a direct non-"use strict" call to eval via fnLocalEvaler
                     else {
                         fnLocalEvaler(oLocal);
                     }
-
+                    
                     //# Return the resulting eval'uations/.parses to the caller in the same form they were passed in
                     return (bReturnArray ? a_sReturnVal : a_sReturnVal[0]);
                 };
             } //# factory
             
             
-            //# Polyfill JSON.parse from jQuery, a sandbox or our fnFallback if necessary
+            //# Polyfill JSON.parse from jQuery, a sandbox or ultimately our fnFallback if necessary
             if (!$win.JSON) {
-                $win.JSON = { parse: ($win.jQuery ? $win.jQuery.parseJSON : createSandbox().$eval) };
+                $win.JSON = { parse: ($win.jQuery ? $win.jQuery.parseJSON : createSandbox().$sandbox.local) };
             }
             
             //# Create the factory to return to the caller
@@ -603,21 +709,17 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             };
         }; //# return
     })(function (/* oObj */) { //# This fnLocalEvaler function is placed here to limit its scope and local variables as narrowly as possible (hence the backflips with the arguments pseudo-array below)
-        //# Traverse the passed .imports (if any), importing each of its entries by .key into this[key] as we go
+        //# Traverse the passed .inject'ions (if any), importing each of its entries by .key into this[key] as we go
         //#     NOTE: This is basicially a reimplementation of merge() that uses no local varaibles and exposes the .key's via `var` declarations
         //#     TODO: Ensure for-in loop below is valid across browsers (since we are using arguments in an odd way)
-        if (arguments[0].imports) {
-            for (arguments[0].key in arguments[0].imports) {
-                if (arguments[0].imports.hasOwnProperty(arguments[0].key)) {
-                    eval("var " + arguments[0].key + ";");
-                    this[arguments[0].key] = this[arguments[0].key] || arguments[0].imports[arguments[0].key];
+        if (arguments[0].inject) {
+            for (arguments[0].key in arguments[0].inject) {
+                if (arguments[0].inject.hasOwnProperty(arguments[0].key)) {
+                    eval("var " + arguments[0].key + " = arguments[0].inject[arguments[0].key];");
                 }
             }
         }
-
-        //# Set the passed .returnVals to a null-array in prep for the loop below
-        arguments[0].returnVals = [];
-
+        
         //# Traverse the passed .js, processing each entry in-turn (as ordering matters)
         //#     NOTE: The loop below is done in this way so as to expose no local vars (outside of the .imports) to the eval'd code
         //#     NOTE: Since this block is outside of the "use strict" block above, the eval'd code will remain in-scope across all evaluations (rather than isolated per-entry as is the case with "use strict"). This allows for local functions to be declared and used, but they automaticially fall out of scope once we leave this function.
@@ -626,3 +728,38 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
         }
     })
 );
+
+
+/*
+//# SCRIPT tag versus eval - http://stackoverflow.com/questions/8380204/is-there-a-performance-gain-in-including-script-tags-as-opposed-to-using-eval
+//# 
+//# http://www.nczonline.net/blog/2009/07/28/the-best-way-to-load-external-javascript/
+//# http://stackoverflow.com/questions/8946715/lazy-loading-javascript-and-inline-javascript
+//# http://www.html5rocks.com/en/tutorials/speed/script-loading/
+//# https://github.com/jquery/jquery/blob/1.3.2/src/ajax.js#L264 but no longer in https://github.com/jquery/jquery/blob/1.x-master/src/ajax.js
+function loadScript(sUrl, fnCallback) {
+    var $script = document.createElement("script"),
+        bLoaded = false
+    ;
+
+    //# Setup the $script tag
+    $script.type = "text/javascript";
+    $script.onload = $script.onreadystatechange = function () { 
+        //# In order to support IE10- and Opera, test .readyState (which will be `undefined` in other environments), see: http://msdn.microsoft.com/en-au/library/ie/ms534359%28v=vs.85%29.aspx
+        switch ($script.readyState || null) {
+            case null:
+            case "loaded":
+            case "complete": {
+                delete $script.onreadystatechange;
+                if (!bLoaded) { fnCallback(); }
+                bLoaded = true
+            }
+        }
+    };
+    $script.src = sUrl;
+
+    //# 
+    document.getElementsByTagName("head")[0].appendChild(script);
+    //? document.documentElement.insertBefore(script, document.documentElement.firstChild);
+}
+*/
