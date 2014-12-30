@@ -2,7 +2,7 @@
     <head>
         <title>CjsSS.js :: Cascading Javascript Style Sheets :: Next Generation CSS Preprocessor | Reprocessor</title>
         
-        <style type="text/css" cjsss='{ "scope": "sandbox", "expose": true }'>
+        <style id="myCss" type="text/css" cjsss='{ "scope": "sandbox", "expose": "true" }'>
             /* Fonts */
             @font-face {
                 font-family: 'Comic Sans';
@@ -144,15 +144,6 @@
                 A:hover {
                     border-bottom: 1px solid /*{{oColors.red}}*/;
                 }
-
-            SPAN.ugly {
-                font-family: /*{{oCSS.$fonts.ugly}}*/;
-                color: /*{{oColorSets.green}}*/;
-            }
-            SPAN.pretty {
-                font-family: /*{{oCSS.$fonts.pretty}}*/;
-                color: /*{{oColorSets.pink}}*/;
-            }
             
             UL#demo {
                 list-style: none;
@@ -249,6 +240,7 @@
             .overview,
             .options,
             .gettingstarted,
+            .examples,
             .gotchas,
             .snake,
             .about {
@@ -387,6 +379,35 @@
                 return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
             }
 
+            //# Spins through the profiles auto-majicially to demo the functionality
+            function demo() {
+                var iTimeoutID,
+                    iCount = 0,
+                    iCurrent = -1,
+                    $lis = document.getElementById("demo").children,
+                    fnAutoClick = function() {
+                        iCount++;
+                        iCurrent++;
+
+                        //# Ensure iCurrent is within the confines of the $lis
+                        if (iCurrent >= $lis.length) {
+                            iCurrent = 0;
+                        }
+
+                        //# .click the iCurrent $lis
+                        $lis[iCurrent].click();
+
+                        //# Only run th demo a hand-full of times back to the original profile
+                        if (iCount < 8) {
+                            iTimeoutID = setTimeout(fnAutoClick, 1500);
+                        }
+                    }
+                ;
+
+                //# Kickoff the demo
+                fnAutoClick();
+            }
+
             //# 
             function mutateCSS($li) {
                 var i,
@@ -449,7 +470,8 @@
                         break;
                     }
                 }
-                
+
+                //#
                 cjsss.process();
             }
         </script>
@@ -459,7 +481,7 @@
     </head>    
     <body>
         <div class="splash">
-            <a class="download" href="https://github.com/campbeln/ngcss">Download From GitHub</a>
+            <a class="download" href="https://github.com/campbeln/cjsss">Download From GitHub</a>
 
             <h1>
                 C<span><span>&lt;</span>js<span>&gt;</span></span>SS.js
@@ -467,10 +489,10 @@
             <span class="tagline">Next Generation CSS Preprocessor | Reprocessor</span>
 
             <br/><img src="img/cj.png" id="cj" />
-            <ul id="demo">
-                <li style="background-color: #554233;" onclick="mutateCSS(this)"></li>
-                <li style="background-color: #d4c668;" class="active" onclick="mutateCSS(this)"></li>
-                <li style="background-color: #c695cf;" onclick="mutateCSS(this)"></li>
+            <ul id="demo"><!-- #554233 #d4c668 #c695cf  /*{{oColors.brown}}*/  -->
+                <li style="background-color: /*{{oColors.brown}}*/;" cjsss="#myCss" onclick="mutateCSS(this)"></li>
+                <li style="background-color: /*{{oColors.yellow}}*/;" cjsss="#myCss" onclick="mutateCSS(this)" class="active"></li>
+                <li style="background-color: /*{{oColors.pink}}*/;" cjsss="#myCss" onclick="mutateCSS(this)"></li>
             </ul>
 
             <span class="tagline">You <em>already</em> know both languages (and you only hate <em>one</em> of them)!</span>
@@ -492,13 +514,17 @@
                     <li>Your CSS stays CSS, no language features to learn or mentally decode</li>
                 <li>Vanilla Javascript toolkit with no external dependencies</li>
                     <li>No need for developer debugging tools, just view source or inspect element</li>
-                <li>Create complex mixins with nested Javascript <pre>object</pre>s</li>
+                <li>Create complex mixins with nested Javascript/JSON <pre>object</pre>s</li>
                     <li>Client-side CSS preprocessor and reprocessor capabilities with no plugins required</li>
                 <li><pre>camelCase</pre> to <pre>dash-case</pre> of Javascript <pre>object</pre> keys converted auto-magicially</li>
                     <li><pre>eval</pre>uated Javascript fully sandboxed by default</li>
                 <li>Use any Javascript library within your CSS, not just language supported functions</li>
-                    <li>~550 lines of source code is fully commented and accessible to the brave and not-so-brave alike</li>
+                    <li>Supports external <pre>SCRIPT</pre> references within the CSS (e.g. <pre>&lt;script src='<a href="https://github.com/gka/chroma.js">https://github.com/gka/chroma.js</a>'&gt;&lt;/script&gt;</pre>).</li>
+                <li>Ability to use <pre>{{Variable}}</pre>s within <pre>style</pre> attributes</li>
+                    <li>~550 lines of source code are fully commented and accessible to the brave and not-so-brave alike</li>
             </ul>
+            <img src="img/twistedsister.png" style="position: absolute; width: 7%; left: 1%; margin-top: -0.7%;" alt="Our (twisted) sister project: ngCss" />
+            Check out the Angular Directive+Filter+Factory (twisted) sister project <a href="http://opensourcetaekwondo.com/ngcss/">ngCss</a> for a CSS Preprocessor | Reprocessor with Angular binding.
         </div>
 
         <a name="options"></a>
@@ -643,15 +669,21 @@
                 <h3>d1</h3>
                 <div>
                     <em>STRING</em>
-                    <em>/*{{</em>
-                    Starting delimiter denoting embedded Javascript variables, e.g. <pre>color: <strong>/*{{</strong>mainColor}}/*</pre>.
+                    <em>{{</em>
+                    Starting delimiter denoting embedded Javascript variables, e.g. <pre>color: /*<strong>{{</strong>mainColor}}/*</pre>.
+                    <div class="note">
+                        Adjacent leading CSS comment syntax (e.g. <pre><strong>/*</strong>{{</pre>) is implicitly removed, allowing you to have easier to maintain CSS.
+                    </div>
                 </div>
 
                 <h3>d2</h3>
                 <div>
                     <em>STRING</em>
-                    <em>}}*/</em>
-                    Ending delimiter denoting embedded Javascript variables, e.g. <pre>color: /*{{mainColor<strong>}}/*</strong></pre>.
+                    <em>}}</em>
+                    Ending delimiter denoting embedded Javascript variables, e.g. <pre>color: /*{{mainColor<strong>}}</strong>/*</pre>.
+                    <div class="note">
+                        Adjacent trailing CSS comment syntax (e.g. <pre>}}<strong>*/</strong></pre>) is implicitly removed, allowing you to have easier to maintain CSS.
+                    </div>
                 </div>
             </div>
 
@@ -683,7 +715,7 @@ window.cjsss = {
             Assuming the default option values are in effect <a href="#options">as described above</a>:
             <ol>
                 <li>
-                    <a href="https://github.com/campbeln/ngcss">Download CjsSS.js From GitHub</a>
+                    <a href="https://github.com/campbeln/cjsss">Download CjsSS.js From GitHub</a>
                 </li>
                 <li>
                     Include the CjsSS.js <pre>SCRIPT</pre> tag(s) in the <pre>HEAD</pre> of your HTML document <strong>below</strong> any <pre>LINK</pre> / <pre>STYLE</pre> tags you want to process:
@@ -883,6 +915,22 @@ p {
 
         </div>
 
+        <div class="examples">
+            <h2>Examples</h2>
+            To be added...
+
+<!--
+            <h3>Complex Example</h3>
+            This page is setup as a complex example; be sure to view source and explore the code for more examples and ideas.
+            The two live-bound STYLE elements share one <pre>$scope</pre> and are setup to allow for in-line SCRIPTs (so all of the data is setup within the STYLE element itself, not in the <pre>ng-controller</pre>) and it imports the <pre>$scope</pre> from the <pre>ng-controller</pre>.
+            Have a play with the various CSS values and see the changes live in this page:
+-->
+
+            <h3>Jasmine Test Results</h3>
+            To be added...
+
+        </div>
+
         
         <div class="gotchas">
             <h2>Gotchas</h2>
@@ -933,7 +981,7 @@ SPAN {
                             <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON.parse</a>&Dagger;, <pre>cjsss.polyfill.js</pre> or jQuery's <pre>$.parseJSON()</pre>
                         </li>
                         <li>
-                            <a href="http://quirksmode.org/dom/core/#t125">hasAttribute</a>&Dagger; is internally polyfilled to support back to IE6
+                            <a href="http://quirksmode.org/dom/core/#t125">hasAttribute</a>&Dagger; is internally polyfilled to support IE6-7
                         </li>
                         <li>
                             <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest">XMLHttpRequest</a> or IE6-7's <a href="http://toddmotto.com/writing-a-standalone-ajax-xhr-javascript-micro-library/">ActiveXObject</a>
@@ -975,6 +1023,7 @@ SPAN {
 
 
         <div class="snake">
+            <img src="img/cj-sm.png" style="right: 1%; width: 10%; position: absolute;" />
             <h3>What is up with the snake?</h3>
             <p>
                 Oh, you mean Cee & Jay? They are the mascots for CjsSS.js!
@@ -1009,5 +1058,10 @@ SPAN {
                 If you are a company that finds this code useful, please feel free to toss more than a few dollars into my tip jar ;)
             </p>
         </div>
+
+        <script>
+            cjsss.process();
+            demo();
+        </script>
     </body>
 </html>
