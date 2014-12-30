@@ -1,17 +1,15 @@
 /*
-Copyright (c) 2014 Nick Campbell (ngcssdev@gmail.com)
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+CjsSS.js v0.5 (kk) http://opensourcetaekwondo.com/cjsss
+(c) 2014 Nick Campbell cjsssdev@gmail.com
+License: MIT
 Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color functionality present in LESS and Sass.
 */
 (function ($win, $doc, fnEvalFactory) {
     "use strict";
 
     var bExposed = false,
-        $head = ($doc.head || $doc.getElementsByTagName("head")[0]),
         cjsss = "cjsss",
+        reScript = /<script.*?>([\s\S]*?)<\/script>/gi,
         $cjsss = {
             options: {
                 selector: "[" + cjsss + "], [data-" + cjsss + "]",      //# STRING (CSS Selector);
@@ -24,7 +22,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             },
             services: {},
 
-            version: "0.1.1b",
+            version: "v0.5 (kk)",
             data: {
                 services: {},
                 inject: {},
@@ -49,8 +47,9 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
     //# Autorun functionality
     $services.autorun = function () {
         //# If we have a .selector then we need to .process them (using the default options of .process)
+        //#     NOTE: We pass in the .selector as the first argument of .process to allow the developer to set it to an array of DOM objects if they so choose
         if (oDefaults.selector) {
-            $services.process();
+            $services.process(oDefaults.selector);
         }
         //# Else we'll need to .expose ourselves (otherwise the developer won't have access our functionality)
         else {
@@ -79,6 +78,9 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             //# .extend the current $win[cjsss] (if any) with the internal $cjsss, resetting both to the new .extend'ed object
             //#     NOTE: oDefaults and $services are .extended in the procedural code below, so there is no need to so it again here
             $cjsss = $win[cjsss] = $services.extend($win[cjsss], $cjsss);
+
+            //# Ensure that $cjsss is also .inject'd into any sandboxes
+            $services.inject(cjsss, $cjsss);
         }
     }; //# $services.expose
 
@@ -107,33 +109,50 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             }
         }
 
-        //# For convenience, return the oTarget to the caller (to allow for `o = $service.extend({}, obj1, obj2)`-style calls)
+        //# For convenience, return the oTarget to the caller (to allow for `objX = $service.extend({}, obj1, obj2)`-style calls)
         return oTarget;
     }; //# $services.extend
 
 
     //# Wrapper for a GET AJAX call
-    $services.get = function (sUrl, bAsync, oCallback) {
-        var $xhr;
-        
+    $services.get = function (sUrl, bAsync, vCallback) {
+        var XHRConstructor = (XMLHttpRequest || ActiveXObject),
+            $xhr
+        ;
+
         //# IE5.5+, Based on http://toddmotto.com/writing-a-standalone-ajax-xhr-javascript-micro-library/
         try {
-            $xhr = new(this.XMLHttpRequest || ActiveXObject)('MSXML2.XMLHTTP.3.0');
-        } catch (e) {}
+            $xhr = new XHRConstructor('MSXML2.XMLHTTP.3.0');
+        } catch (e) { }
+
+        //# If a function was passed rather than an object, object-ize it (else we assume it's an object with at least a .fn)
+        if ($services.is.fn(vCallback)) {
+            vCallback = { fn: vCallback, arg: null };
+        }
 
         //# If we were able to collect an $xhr object
         if ($xhr) {
-            //# Setup the callback
+            //# Setup the $xhr callback
             //$xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             $xhr.onreadystatechange = function () {
-                if ($xhr.readyState === 4 && $xhr.status === 200) {
-                    oCallback.fn($xhr.responseText, oCallback.arg);
+                //# If the request is finished and the .responseText is ready
+                if ($xhr.readyState === 4) {
+                    vCallback.fn(
+                        ($xhr.status === 200 || ($xhr.status === 0 && sUrl.substr(0, 7) === "file://")),
+                        $xhr.responseText,
+                        vCallback.arg,
+                        $xhr
+                    );
                 }
             };
 
             //# GET the sUrl
             $xhr.open("GET", sUrl, bAsync);
             $xhr.send();
+        }
+        //# Else we were unable to collect the $xhr, so signal a failure to the vCallback.fn
+        else {
+            vCallback.fn(false, null, vCallback.arg, $xhr);
         }
     };
 
@@ -187,11 +206,17 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
     //# Returns the mixin function
     //#     NOTE: We require a factory here so that sCRLF is settable across all function calls
     $services.mixinFactory = function (sCrLf) {
-        return function (oObj, bSelector) {
-            return (bSelector ? oObj._selector + " {" : "") +
-                $services.toCss(oObj, sCrLf) +
-                (bSelector ? "}" : "")
-            ;
+        return function (oObj, vSelector) {
+            //# If the passed oObj .is.obj
+            if ($services.is.obj(oObj)) {
+                return (vSelector ? ($services.is.str(vSelector) ? vSelector : oObj._selector) + " {" : "") + sCrLf +
+                    $services.toCss(oObj, sCrLf) + sCrLf +
+                    (vSelector ? "}" : "")
+                ;
+            }
+            else {
+                return "";
+            }
         };
     };
 
@@ -199,27 +224,27 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
     //# Transforms the passed object into an inline CSS string (e.g. `color: red;\n`)
     //#     NOTE: This function recurses if it finds an object
     $services.toCss = function (oObj, sCrLf) {
-        var sKey, entry,
+        var sKey, vEntry,
             sReturnVal = ""
         ;
 
         //# Traverse the oObj
         for (sKey in oObj) {
-            //# So long as this is not a ._selector
-            if (sKey !== "_selector") {
-                entry = oObj[sKey];
+            //# So long as this is a .hasOwnProperty and is not a ._selector
+            if (oObj.hasOwnProperty(sKey) && sKey !== "_selector") {
+                vEntry = oObj[sKey];
 
                 //# Transform the sKey from camelCase to dash-case (removing the erroneous leading dash if it's there)
                 sKey = sKey.replace(/([A-Z])/g, '-$1').toLowerCase();
                 sKey = (sKey.indexOf("-") === 0 ? sKey.substr(1) : sKey);
 
-                //# If this entry is.obj(ect), recurse toCss() the sub-obj
-                if ($services.is.obj(entry)) {
-                    sReturnVal += $services.toCss(entry);
+                //# If this vEntry is.obj(ect), recurse toCss() the sub-obj
+                if ($services.is.obj(vEntry)) {
+                    sReturnVal += $services.toCss(vEntry, sCrLf);
                 }
-                    //# Else we assume this is a stringable-based entry
+                //# Else we assume this is a stringable-based vEntry
                 else {
-                    sReturnVal += sKey + ":" + entry + ";" + sCrLf;
+                    sReturnVal += sKey + ":" + vEntry + ";" + sCrLf;
                 }
             }
         }
@@ -247,26 +272,100 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             return bReturnVal;
         };
     }; //# $services.hasAttribute
-    
+
+
+    //#
+    $services.newId = function(sPrefix) {
+        var sRandom = Math.floor(Math.random() * 1000);
+
+        //#
+        sPrefix = sPrefix || cjsss;
+
+        //#
+        while (document.getElementById(sPrefix + sRandom)) {
+            sRandom = Math.floor(Math.random() * 1000);
+        }
+
+        return sPrefix + sRandom;
+    };
+
     
     //# Processes the CSS within the passed vElements using the provided oOptions (overriding any previously set)
     $services.process = function (vElements, oOptions) {
-        var i, $current, sAttrName,
+        var i, $current, sAttrName, sOptions, sID,
             $elements = [],
             o = $services.extend({}, oDefaults, oOptions),
-            eOptionScope = o.optionScope
+            eOptionScope = o.optionScope,
+            fnCallback = function (bSuccess, sCSS, oData) {
+                //# If the call was a bSuccess, setup the new $style tag
+                if (bSuccess) {
+                    var $style = $doc.createElement('style');
+                    $style.type = "text/css"; //# $style.setAttribute("type", "text/css");
+                    $style.setAttribute(oData.attr, oData.$link.getAttribute(oData.attr) || "");
+
+                    //# Replace the .$link with the new $style, then copy across the .id
+                    oData.$link.parentNode.replaceChild($style, oData.$link);
+                    $style.id = oData.id;
+
+                    //# Set the .css into the oCache then .processCSS (while .processGetScripts as we go)
+                    oCache[oData.id].css = sCSS;
+                    prepLinkStyle(sID);
+                    $services.processCSS(
+                        $style,
+                        o,
+                        $services.processGetScripts(oData.id)
+                        //,false
+                    );
+                }
+            }
         ;
+
+        //# Populates the o(ptions) and oCache for LINK and STYLE tags
+        function prepLinkStyle(sID, sCSS) {
+            var oContext;
+
+            //# If the passed sID hasn't been oCache'd, do so now
+            if (!oCache[sID]) {
+                oContext = $services.evalFactory.context(o.scope);
+
+                //# Setup the oCache entry for the sID
+                oCache[sID] = {
+                    //run: false,
+                    id: sID,
+                    css: sCSS,
+                    options: $services.evalFactory.create(eOptionScope)(sOptions),
+                    mode: oContext.mode,
+                    evaler: $services.evalFactory.create(oContext.context)
+                };
+            }
+
+            //# Recollect our o(ptions) in the proper priority order (right-most wins)
+            o = $services.extend({},
+                oDefaults,
+                oCache[sID].options,
+                oOptions
+            );
+
+            //# If we have been told to .expose ourselves, so do now (before we run any code below)
+            if (o.expose) {
+                $services.expose();
+            }
+
+            //# Rebuild the .mixinFactory with the supplied .crlf, re-.inject'ing it into our oInjections
+            $services.inject("mixin", $services.mixinFactory(o.crlf));
+        }
+
 
         //# If a truthy vElements was passed
         if (vElements) {
-            //# If the passed vElements is CSS Selector(-ish), selector the $elements now
+            //# If the passed vElements is CSS Selector(-ish), select the $elements now
             if ($services.is.str(vElements)) {
                 $elements = $services.dom(vElements);
             }
             //# Else ensure $elements is an array-like object
             //#     NOTE: Since a NodeList is not a native Javascript object, .hasOwnProperty doesn't work
             else {
-                $elements = (vElements[0] && vElements.length > 0 ? vElements : [vElements]);
+                $elements = (vElements[0] && vElements.length ? vElements : [vElements]);
             }
         }
         //# Else if we have a .selector, reset the $elements accordingly
@@ -280,41 +379,77 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             $current = $elements[i];
             $current.hasAttribute = $current.hasAttribute || $services.hasAttribute($current);  //# .hasAttribute is IE8+ only, hence the polyfill
             sAttrName = ($current.hasAttribute("data-" + cjsss) ? "data-" : "") + cjsss;
-            o = $services.extend({},
-                oDefaults,
-                $services.evalFactory.create(eOptionScope)($current.getAttribute(sAttrName) || ""),
-                oOptions
-            );
-            
-            //# If we have been told to .expose ourselves, so do now (before we run any code below)
-            if (o.expose) {
-                $services.expose();
-            }
+            sOptions = $current.getAttribute(sAttrName) || "{}";
+
+            //# Ensure the $current $elements has an .id
+            sID = $current.id = $current.id || $services.newId();
 
             //# Determine the .tagName and process accordingly
             //#     NOTE: We utilize the oCache below so that we can re-process the CSS if requested, else we loose the original value when we reset innerHTML
             switch ($current.tagName.toLowerCase()) {
                 case "style": {
-                    $services.processStyle($current, o);
+                    //# prepLinkStyle then .processCSS (while .processGetScripts as we go)
+                    prepLinkStyle(sID, $current.innerHTML);
+                    $services.processCSS(
+                        $current,
+                        o,
+                        $services.processGetScripts(sID)
+                        //,false
+                    );
                     break;
                 }
                 case "link": {
+                    //# prepLinkStyle, passing in our sID only (as we need to collect our CSS via AJAX)
+                    prepLinkStyle(sID);
+
                     //# Collect the css from the LINK's href'erenced file
                     //#     NOTE: We use .href rather than .getAttribute("href") because .href is a fully qualified URI while .getAttribute returns the set string
                     $services.get($current.href, o.async, {
-                        fn: function (sCss, oData) {
-                            //# Setup the new $style tag
-                            var $style = $doc.createElement('style');
-                            $style.setAttribute("type", "text/css"); //# $style.type = "text/css";
-                            $style.setAttribute(oData.attr, oData.$link.getAttribute(oData.attr) || "");
-                            $services.processStyle($style, o, sCss);
-
-                            //# Remove the .$link then append the new $style element under our $head
-                            oData.$link.parentNode.removeChild(oData.$link);
-                            $head.appendChild($style);
-                        },
-                        arg: { $link: $current, attr: sAttrName }
+                        fn: fnCallback,
+                        arg: { $link: $current, attr: sAttrName, id: sID, o: o }
                     });
+                    break;
+                }
+                default: {
+                    //# If the $current sID hasn't been oCache'd, do so now
+                    if (!oCache[sID]) {
+                        //# Setup the oCache entry for this tag while ensuring sOptions is an object definition before creation
+                        oCache[sID] = {
+                            //id: sID,
+                            css: $current.getAttribute("style"),
+                            options: $services.evalFactory.create(eOptionScope)(
+                                (sOptions.indexOf("{") === 0 ? sOptions : '{ "selector": "' + sOptions + '" }')
+                            )
+                            //,mode: "based on parent.mode"
+                            //,evaler: undefined
+                        };
+                    }
+
+                    //# Pull the initial o(ptions) so we can get our oParent
+                    o = $services.extend({}, oCache[sID].options, oOptions);
+                    var oContext,
+                        $parent = $services.dom(o.selector)[0],
+                        oParent = oCache[$parent.id]
+                    ;
+
+                    //# If we found our oParent's oCache entry
+                    if (oParent) {
+                        //#
+                        //oCache[sID].mode = oParent.mode;
+                        oCache[sID].evaler = oParent.evaler;
+
+                        //#
+                        $services.processCSS(
+                            $current,
+                            $services.extend({}, oDefaults, oParent.options, oCache[sID].options, oOptions),
+                            $services.processGetScripts(oParent.id),
+                            true
+                        );
+                    }
+                    //# Else we were unable to find the oParent, so .warn
+                    else {
+                        $services.warn("Unable to locate parent element for " + $current);
+                    }
                 }
             } //# switch()
         } //# for()
@@ -324,119 +459,96 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
     }; //# $services.process()
 
 
-    //# Processes the passed $style tag using the provided oOptions
-    $services.processStyle = function ($style, oOptions, sCss) {
-        var oContext, sMode,
-            reScript = /<script.*?>([\s\S]*?)<\/script>/gi,
+    //# Collects the SCRIPT blocks within the passed sID's .css, returning the eval stack
+    $services.processGetScripts = function(sID) {
+        var $src, i, a_sJS,
+            sMode = oCache[sID].mode,
             reDeScript = /<[\/]?script.*?>/gi,
-            reScriptSrc = /<script.*?src=['"](.*?)['"].*?>/i
+            reScriptSrc = /<script.*?src=['"](.*?)['"].*?>/i,
+            fnCallback = function(bSuccess, sJS, iIndex) {
+                a_sJS[iIndex] = (bSuccess ? sJS : "");
+            }
         ;
 
-        //# If the oCache hasn't been setup yet for this $style tag
-        if (!oCache[$style]) {
-            oContext = $services.evalFactory.context(oOptions.scope);
-            sCss = sCss || $style.innerHTML;
+        //# If we haven't .run yet or we are in a .mode that we need to reprocess the SCRIPTs each time (because they fall out of scope)
+        if (!oCache[sID].run || sMode === "l" || sMode === "t") {
+            //# Collect the SCRIPT tags into a_sJS and flip .run to true
+            a_sJS = oCache[sID].css.match(reScript) || [];
+            oCache[sID].run = true;
 
-            //# Setup the oCache entry for this $style tag
-            oCache[$style] = {
-                css: sCss,
-                mode: oContext.mode,
-                evaler: $services.evalFactory.create(oContext.context)
-            };
+            //# Traverse the extracted SCRIPT tags from the .css (if any)
+            for (i = 0; i < a_sJS.length; i++) {
+                $src = reScriptSrc.exec(a_sJS[i]);
 
-            //# If we are supposed to .expose ourselves and we just setup a s(andbox), .inject $cjsss now
-            if (oOptions.expose && oContext.mode === "s") {
-                $services.inject(cjsss, $cjsss);
+                //# If there is an $src in the SCRIPT tag, .get the resulting js synchronously (as order of SCRIPTs matter)
+                if ($src && $src[1]) {
+                    $services.get($src[1], false, {
+                        fn: fnCallback,
+                        arg: i
+                    });
+                }
+                //# Else this is an inline SCRIPT tag, so load the reDeScript'd code into the a_sJS eval stack
+                else {
+                    a_sJS[i] = a_sJS[i].replace(reDeScript, "");
+                }
             }
         }
 
-        //# Collect the sMode and sCss from the oCache (now that we know it's setup fully)
-        sMode = oCache[$style].mode;
-        sCss = oCache[$style].css;
+        return a_sJS || [];
+    }; //# $services.processGetScripts
 
-        //# Rebuild the .mixinFactory with the supplied .crlf, re-.inject'ing it into our oInjections
-        $services.inject("mixin", $services.mixinFactory(oOptions.crlf));
 
-        //$services.inject("invertColor", function (sHex) {
-        //    var r, g, b, sReturnVal;
+    //# Processes the CSS along with any a_sJS in the passed eval stack
+    $services.processCSS = function($element, oOptions, a_sJS, bSetAttribute) {
+        var i, a_sToken, sProcessedCSS,
+            sID = $element.id,
+            a_sTokenized = oCache[sID].css
+                .replace(reScript, "")                                          //# Remove the SCRIPTs (so we don't have extra delimiters that get wrongly a_sTokenized)
+                .replace(new RegExp("/\\*" + oOptions.d1, "g"), oOptions.d1)    //# Replace any commented delimiters with non-delimitered versions
+                .replace(new RegExp(oOptions.d2 + "\\*/", "g"), oOptions.d2)    //# TODO: Move to setting .css?
+                .split(oOptions.d1)                                             //# Now .split the processed .css
+        ;
 
-        //    if (sHex.length === 7 && sHex.indexOf('#') === 0) {
-        //        r = "0" + (255 - parseInt(sHex.substr(1, 2), 16)).toString(16);
-        //        g = "0" + (255 - parseInt(sHex.substr(3, 2), 16)).toString(16);
-        //        b = "0" + (255 - parseInt(sHex.substr(5, 2), 16)).toString(16);
-        //        sReturnVal = "#" + r.substr(-2) + g.substr(-2) + b.substr(-2);
-        //    }
+        //# Traverse the a_sTokenized .css
+        for (i = 1; i < a_sTokenized.length; i++) {
+            //# .split the a_sToken off the front of this entry
+            //#     NOTE: Since `.split(delimiter, limit)` truncates to `limit` rather than stopping, we need to .shift and .join below
+            a_sToken = a_sTokenized[i].split(oOptions.d2);
 
-        //    return sReturnVal;
-        //});
+            //# .shift and .push the first index into our a_sJS eval stack and re-.join the reminder
+            //#     NOTE: i: related index within a_sJS (as .push returns the new .length); s: trailing .css string
+            a_sTokenized[i] = {
+                i: a_sJS.push(a_sToken.shift()) - 1,
+                s: a_sToken.join(oOptions.d2)
+            };
+        }
 
-        //# Form a closure around the logic to ensure the variables are not garbage collected during async calls
-        //#     NOTE: I have no idea why this was occurring and this closure may not be necessary (a_sJS was being set to null). Seemed to be due to parallel calls squashing each others function vars(?!). Maybe function variables are not new'd per invocation?
-        //#     TODO: Find out why this error was occuring and remove closure if it's not necessary
-        //#     TODO: Look into tokenizing sCss as we go so SCRIPTs and tokens are processed in series rather than SCRIPTs then tokens as currently implemented
-        return (function () {
-            var a_sToken, $src, sProcessedCss, i,
-                a_sJS = [],
-                a_sTokenized = sCss.replace(reScript, "").split(oOptions.d1)
-            ;
+        //# Now that we have a fully populated a_sJS eval stack, process it while passing in the (globally defined) oInjections
+        a_sJS = oCache[sID].evaler(a_sJS, oInjections);
 
-            //# If we just setup the oCache (as indicated by a non-undefined oContext) or we are in a .mode that we need to reprocess the SCRIPTs each time because they fall out of scope
-            if (oContext || sMode === "l" || sMode === "t") {
-                a_sJS = sCss.match(reScript) || [];
+        //# Set the first index of a_sTokenized into sProcessedCSS then traverse the rest of the a_sTokenized .css, rebuilding it as we go
+        //#     NOTE: Since we are splitting on .d(elimiter)1, the first index of a_sTokenized represents the STYLE before the first /*{{var}}*/ so we don't process it and simply set it as the start of our sReturnVal
+        sProcessedCSS = a_sTokenized[0];
+        for (i = 1; i < a_sTokenized.length; i++) {
+            //# Pull the result of the eval from a_sJS at the recorded .i(ndex) and append the trailing .css .s(tring)
+            sProcessedCSS += a_sJS[a_sTokenized[i].i] + a_sTokenized[i].s;
+        }
 
-                //# Traverse the extracted SCRIPT tags from the sCss (if any)
-                for (i = 0; i < a_sJS.length; i++) {
-                    $src = reScriptSrc.exec(a_sJS[i]);
-
-                    //# If there is an $src in the SCRIPT tag, .get the resulting js synchronously (as order of SCRIPTs matters) 
-                    if ($src && $src[1]) {
-                        $services.get($src[1], false, {
-                            fn: function (js) {
-                                a_sJS[i] = js;
-                            }
-                        });
-                    }
-                        //# Else this is an inline SCRIPT tag, so load the local reDeScript'd code into the a_sJS eval stack
-                    else {
-                        a_sJS[i] = a_sJS[i].replace(reDeScript, "");
-                    }
-                }
-            }
-
-            //# Traverse the a_sTokenized sCss
-            for (i = 1; i < a_sTokenized.length; i++) {
-                //# .split the a_sToken off the front of this entry
-                //#     NOTE: Since `.split(delimiter, limit)` truncates to `limit` rather than stopping, we need to .shift and .join below
-                a_sToken = a_sTokenized[i].split(oOptions.d2);
-
-                //# .shift and .push the first index into our a_sJS eval stack and .join the reminder
-                //#     NOTE: i: related index within a_sJS (as .push returns the new .length); s: trailing sCss string
-                a_sTokenized[i] = {
-                    i: a_sJS.push(a_sToken.shift()) - 1,
-                    s: a_sToken.join(oOptions.d2)
-                };
-            }
-
-            //# Now that we have fully populated our a_sJS eval stack, process it while passing in the oInjections
-            a_sJS = oCache[$style].evaler(a_sJS, oInjections);
-
-            //# Set the first index of a_sTokenized into sProcessedCss then traverse the rest of the a_sTokenized sCss, rebuilding it as we go
-            //#     NOTE: Since we are splitting on .d(elimiter)1, the first index of a_sTokenized represents the STYLE before the first /*{{var}}*/ so we don't process it and simply set it as the start of our sReturnVal
-            sProcessedCss = a_sTokenized[0];
-            for (i = 1; i < a_sTokenized.length; i++) {
-                //# Pull the result of the eval from a_sJS at the recorded .i(ndex) and append the tralining sCss .s(tring)
-                sProcessedCss += a_sJS[a_sTokenized[i].i] + a_sTokenized[i].s;
-            }
-
-            //# If this is IE8 or below we'll have a .styleSheet (and .styleSheet.cssText) to set sCss into, else we can use .innerHTML, see: http://stackoverflow.com/questions/9250386/trying-to-add-style-tag-using-javascript-innerhtml-in-ie8 , http://www.quirksmode.org/dom/html/#t00 , http://stackoverflow.com/questions/5618742/ie-8-and-7-bug-when-dynamically-adding-a-stylesheet , http://jonathonhill.net/2011-10-12/ie-innerhtml-style-bug/
+        //# If we are supposed to bSetAttribute, then set the sProcessedCSS into it
+        if (bSetAttribute) {
+            $element.setAttribute("style", sProcessedCSS);
+        }
+        //# Else we are updating a STYLE tag
+        else {
+            //# If this is IE8 or below we'll have a .styleSheet (and .styleSheet.cssText) to set .css into, else we can use .innerHTML, see: http://stackoverflow.com/questions/9250386/trying-to-add-style-tag-using-javascript-innerhtml-in-ie8 , http://www.quirksmode.org/dom/html/#t00 , http://stackoverflow.com/questions/5618742/ie-8-and-7-bug-when-dynamically-adding-a-stylesheet , http://jonathonhill.net/2011-10-12/ie-innerhtml-style-bug/
             //#     TODO: Test in IE8-
-            if ($style.styleSheet) {
-                $style.styleSheet.cssText = sProcessedCss;
+            if ($element.styleSheet) {
+                $element.styleSheet.cssText = sProcessedCSS;
             } else {
-                $style.innerHTML = sProcessedCss;
+                $element.innerHTML = sProcessedCSS;
             }
-        })();
-    }; //# $services.processStyle
+        }
+    }; //# $services.processCSS
 
 
     //# Safely warns the user on the console
@@ -525,15 +637,9 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                                 return { context: $sandbox, mode: "l" };
                             }
                             //# 
-                            else {
+                            //else {
                                 return { context: oContext, mode: "t" };
-                            }
-
-                            //# createSandbox() for thislocal or set as oContext depending on the eMode
-                            return (eMode === "thislocal"
-                                ? { context: createSandbox(oContext), mode: "l" }
-                                : { context: oContext, mode: "t" }
-                            );
+                            //}
                         }
                         case "j": { //# json
                             return { context: JSON.parse, mode: "j" };
@@ -546,7 +652,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                 }
                 //# Else we assume eMode is the oContext of a t(his) request
                 else {
-                    return { context: eMode, mode: "t" }
+                    return { context: eMode, mode: "t" };
                 }
             }
             
@@ -582,6 +688,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                 oReturnVal = $iFrame.contentWindow;
 
                 //# .write the SCRIPT out to the $iFrame (which implicitly runs the code) then remove the $iFrame from the $dom
+                //#     NOTE: We very specifically do not "use strict" below to allow eval'd code to persist across calls.
                 oReturnVal.document.write(
                     "<script>" +
                         "window.$sandbox={" +
@@ -591,7 +698,8 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                         "parent=null;" +
                     "<\/script>"
                 );
-                $dom.removeChild($iFrame);
+                oReturnVal.document.close();
+                //$dom.removeChild($iFrame);
 
                 //# Return the window reference to the caller
                 return oReturnVal;
@@ -710,8 +818,9 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
         }; //# return
     })(function (/* oObj */) { //# This fnLocalEvaler function is placed here to limit its scope and local variables as narrowly as possible (hence the backflips with the arguments pseudo-array below)
         //# Traverse the passed .inject'ions (if any), importing each of its entries by .key into this[key] as we go
-        //#     NOTE: This is basicially a reimplementation of merge() that uses no local varaibles and exposes the .key's via `var` declarations
-        //#     TODO: Ensure for-in loop below is valid across browsers (since we are using arguments in an odd way)
+        //#     NOTE: This is basically a reimplementation of merge() that uses no local variables and exposes the .key's via `var` declarations
+        //#     NOTE: This is standards compliant even though JSHit hates it ;) http://stackoverflow.com/questions/27682194/is-this-for-in-loop-standards-compliant#27682229
+        //#     NOTE Could polyfill arr.forEach - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach
         if (arguments[0].inject) {
             for (arguments[0].key in arguments[0].inject) {
                 if (arguments[0].inject.hasOwnProperty(arguments[0].key)) {
