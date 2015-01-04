@@ -1,5 +1,5 @@
 /*
-CjsSS.js v0.5 (kk) http://opensourcetaekwondo.com/cjsss
+CjsSS.js v0.5a (kk) http://opensourcetaekwondo.com/cjsss
 (c) 2014 Nick Campbell cjsssdev@gmail.com
 License: MIT
 Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color functionality present in LESS and Sass.
@@ -274,18 +274,16 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
     }; //# $services.hasAttribute
 
 
-    //#
+    //# Returns an unused sPrefix'ed HTML ID
+    //#     NOTE: sPrefix must begin with /A-Za-z/
     $services.newId = function(sPrefix) {
-        var sRandom = Math.floor(Math.random() * 1000);
-
-        //#
+        var sRandom;
         sPrefix = sPrefix || cjsss;
 
-        //#
-        while (document.getElementById(sPrefix + sRandom)) {
+        //# Do...while the sPrefix + sRandom exists as an ID in the document, try to find a unique ID returning the first we find
+        do {
             sRandom = Math.floor(Math.random() * 1000);
-        }
-
+        } while (document.getElementById(sPrefix + sRandom));
         return sPrefix + sRandom;
     };
 
@@ -673,33 +671,45 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             }
 
 
-            //# Creates a sandbox via an iFrame that is temporally added to the DOM
-            //#     NOTE: The `parent` is set to `null` to completely isolate the sandboxed DOM
-            function createSandbox() {
-                var oReturnVal,
-                    $dom = ($doc.body || $doc.head || $doc.getElementsByTagName("head")[0]),
-                    $iFrame = $doc.createElement("iframe")
+            //# Returns an unused HTML ID prefixed with "sandbox"
+            function newId() {
+                var sPrefix = "sandbox",
+                    sRandom = ""
                 ;
 
-                //# Configure the $iFrame, add it into the $dom and collect the $iFrame's DOM reference into our oReturnVal
-                //#     NOTE: `contentWindow` rather than `frames[frames.length - 1]`, see: http://books.google.com.au/books?id=GEQlVcVf_zkC&pg=PA589&lpg=PA589&dq=contentWindow+ie5.5&source=bl&ots=iuq6xGPVtQ&sig=XKY-1_0pMNOo-BWYjHO7uRc47bE&hl=en&sa=X&ei=bZaGVILMGsro8AXxy4DQCQ&ved=0CCgQ6AEwAQ#v=onepage&q=contentWindow%20ie5.5&f=false , http://www.bennadel.com/blog/1592-getting-iframe-window-and-then-document-references-with-contentwindow.htm
-                $iFrame.style.display = "none";
-                $dom.appendChild($iFrame);
-                oReturnVal = $iFrame.contentWindow;
+                //# While the sPrefix + sRandom exists as an ID in the document, try to find a unique ID returning the first we find
+                while ($doc.getElementById(sPrefix + sRandom)) {
+                    sRandom = Math.floor(Math.random() * 1000);
+                }
+                return sPrefix + sRandom;
+            }
+
+
+            //# Creates a sandbox via an iFrame that is added to the DOM
+            //#     NOTE: http://www.html5rocks.com/en/tutorials/security/sandboxed-iframes/#privilege-separation , https://developer.mozilla.org/en-US/docs/Web/API/window.postMessage
+            function createSandbox(sSandboxAttr) {
+                var oReturnVal,
+                    sID = ($doc.getElementById ? newId() : ""),
+                    $dom = ($doc.body || $doc.head || $doc.getElementsByTagName("head")[0])
+                ;
+
+                //# Default the sSandboxAttr, .insertAdjacentHTML iFrame at the beginning of the .body (or .head) then collect the .contentWindow as our oReturnVal
+                sSandboxAttr = sSandboxAttr || "allow-scripts allow-same-origin";
+                $dom.insertAdjacentHTML('afterbegin', '<iframe id="' + sID + '" style="display:none;" sandbox="' + sSandboxAttr + '"></iframe>');
+                oReturnVal = (sID ? $doc.getElementById(sID).contentWindow : $doc.frame[0]);
 
                 //# .write the SCRIPT out to the $iFrame (which implicitly runs the code) then remove the $iFrame from the $dom
                 //#     NOTE: We very specifically do not "use strict" below to allow eval'd code to persist across calls.
                 oReturnVal.document.write(
                     "<script>" +
                         "window.$sandbox={" +
-                            "global: function(){" + globalEvalFn() + "}()," +
-                            "local: function(s){return eval(s);}" +
+                            "global:function(){" + globalEvalFn() + "}()," +
+                            "local:function(s){return eval(s);}" +
                         "};" +
                         "parent=null;" +
                     "<\/script>"
                 );
                 oReturnVal.document.close();
-                //$dom.removeChild($iFrame);
 
                 //# Return the window reference to the caller
                 return oReturnVal;
@@ -808,8 +818,8 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             //# Create the factory to return to the caller
             return {
                 create: factory,
-                sandbox: function (js, fnFallback) {
-                    return factory(createSandbox(), fnFallback)(js);
+                sandbox: function (vJS, fnFallback, sSandboxAttr) {
+                    return factory(createSandbox(sSandboxAttr), fnFallback)(vJS);
                 },
                 json: JSON.parse,
                 createSandbox: createSandbox,
@@ -837,38 +847,3 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
         }
     })
 );
-
-
-/*
-//# SCRIPT tag versus eval - http://stackoverflow.com/questions/8380204/is-there-a-performance-gain-in-including-script-tags-as-opposed-to-using-eval
-//# 
-//# http://www.nczonline.net/blog/2009/07/28/the-best-way-to-load-external-javascript/
-//# http://stackoverflow.com/questions/8946715/lazy-loading-javascript-and-inline-javascript
-//# http://www.html5rocks.com/en/tutorials/speed/script-loading/
-//# https://github.com/jquery/jquery/blob/1.3.2/src/ajax.js#L264 but no longer in https://github.com/jquery/jquery/blob/1.x-master/src/ajax.js
-function loadScript(sUrl, fnCallback) {
-    var $script = document.createElement("script"),
-        bLoaded = false
-    ;
-
-    //# Setup the $script tag
-    $script.type = "text/javascript";
-    $script.onload = $script.onreadystatechange = function () { 
-        //# In order to support IE10- and Opera, test .readyState (which will be `undefined` in other environments), see: http://msdn.microsoft.com/en-au/library/ie/ms534359%28v=vs.85%29.aspx
-        switch ($script.readyState || null) {
-            case null:
-            case "loaded":
-            case "complete": {
-                delete $script.onreadystatechange;
-                if (!bLoaded) { fnCallback(); }
-                bLoaded = true
-            }
-        }
-    };
-    $script.src = sUrl;
-
-    //# 
-    document.getElementsByTagName("head")[0].appendChild(script);
-    //? document.documentElement.insertBefore(script, document.documentElement.firstChild);
-}
-*/
