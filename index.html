@@ -1,16 +1,18 @@
 <html>
     <head>
-        <title>CjsSS.js :: Cascading Javascript Style Sheets :: Next Generation CSS Preprocessor | Reprocessor</title>
+        <title>CjsSS.js :: Use Javascript In Your CSS (Don't Call It A CSS Preprocessor)</title>
         
-        <style id="myCss" type="text/css" cjsss='{ "scope": "sandbox", "expose": "true" }'>
+        <!-- /*cjsss  ({ d1: '[[', d2: ']]' })*/  type="text/cjsss" -->
+        <style id="myCss" type="text/css" cjsss='{ "scope": "global", "expose": "true" }'>
+            
             /* Fonts */
-            @font-face {
-                font-family: 'Comic Sans';
-                src: url('./css/fonts/Comic Sans MS Regular.eot');
-                src: local('☺'), url('./css/fonts/Comic Sans MS Regular.woff') format('woff'), url('./css/fonts/Comic Sans MS Regular.ttf') format('truetype'), url('./css/fonts/Comic Sans MS Regular.svg') format('svg');
-                font-weight: normal;
-                font-style: normal;
-            }
+             @font-face {
+                 font-family: 'Comic Sans';
+                 src: url('./css/fonts/Comic Sans MS Regular.eot');
+                 src: local('☺'), url('./css/fonts/Comic Sans MS Regular.woff') format('woff'), url('./css/fonts/Comic Sans MS Regular.ttf') format('truetype'), url('./css/fonts/Comic Sans MS Regular.svg') format('svg');
+                 font-weight: normal;
+                 font-style: normal;
+             }
             @font-face {
                 font-family: 'Helvetica';
                 src: url('./css/fonts/Helvetica.eot');
@@ -40,7 +42,7 @@
             /*
                 <script>
                     window.cjsss.temp = window.cjsss.temp || {};
-
+                
                     var oCSS,
                         oFonts = {
                             Arial: 'arial',
@@ -116,23 +118,23 @@
             
             /*  */
             H1 {
-                font-family: /*{{oCSS.$fonts.pretty}}*/;
+                font-family: /*[[oCSS.$fonts.pretty]]*/;
                 font-size: 500%;
                 margin: 1% 0 0 0;
                 text-align: center;
             }
             H2 {
-                font-family: /*{{oCSS.$fonts.pretty}}*/;
+                font-family: /*[[oCSS.$fonts.pretty]]*/;
                 font-size: 350%;
                 margin: 1% 0 2% 0;
             }
             H3 {
-                font-family: /*{{oCSS.$fonts.pretty}}*/;
+                font-family: /*[[oCSS.$fonts.pretty]]*/;
                 font-size: 200%;
                 margin: 2% 0 2% 0;
             }
             H4 {
-                font-family: /*{{oCSS.$fonts.pretty}}*/;
+                font-family: /*[[oCSS.$fonts.pretty]]*/;
                 font-size: 150%;
                 margin: 2% 0 2% 0;
             }
@@ -141,30 +143,30 @@
                 color: maroon;
                 text-decoration: none;
             }
-                A:hover {
-                    border-bottom: 1px solid /*{{oColors.red}}*/;
-                }
+            A:hover {
+                border-bottom: 1px solid /*[[oColors.red]]*/;
+            }
             
             UL#demo {
                 list-style: none;
                 margin-top: -2em;
             }
-                UL#demo LI {
-                    height: 3em;
-                    width: 3em;
-                    margin: 5px;
-                    list-style: none;
-                    display: inline-block;
-                    border: 4px solid white;
-                    cursor: pointer;
-                }
-                    UL#demo LI.active {
-                        border-color: black;
-                    }
+            UL#demo LI {
+                height: 3em;
+                width: 3em;
+                margin: 5px;
+                list-style: none;
+                display: inline-block;
+                border: 4px solid white;
+                cursor: pointer;
+            }
+            UL#demo LI.active {
+                border-color: black;
+            }
 
             #cj {
                 width: 70%;
-                background-color: /*{{oCSS.mainColor}}*/;
+                background-color: /*[[oCSS.mainColor]]*/;
                 margin-top: 1em;
             }
 
@@ -173,7 +175,7 @@
                 top: 2%;
                 right: 2%;
                 font-size: 150%;
-                background: none repeat scroll 0 0 /*{{oCSS.mainColor}}*/;
+                background: none repeat scroll 0 0 /*[[oCSS.mainColor]]*/;
                 border-radius: 30px;
                 color: #ffffff;
                 padding: 1% 2%;
@@ -183,7 +185,7 @@
             }
             .donate {
                 top: inherit;
-                background-color: /*{{oColors.blue}}*/;
+                background-color: /*[[oColors.blue]]*/;
                 cursor: pointer;
                 margin-top: -1.5%;
             }
@@ -193,49 +195,49 @@
                 display: inline;
                 padding: 1px;
             }
-                PRE.i {
-                    font-style: oblique;
-                    text-decoration: underline;
-                    text-decoration-style: wavy;
-                    -moz-text-decoration-style: wavy;
-                    text-decoration-color: /*{{oCSS.highlight}}*/;
-                    -moz-text-decoration-color: /*{{oCSS.highlight}}*/;
-                }
-                    PRE.i:before {
-                        content: "[";
-                    }
-                    PRE.i:after {
-                        content: "]";
-                    }
-                PRE > STRONG {
-                    background-color: /*{{oCSS.highlight}}*/;
-                }
+            PRE.i {
+                font-style: oblique;
+                text-decoration: underline;
+                text-decoration-style: wavy;
+                -moz-text-decoration-style: wavy;
+                text-decoration-color: /*[[oCSS.highlight]]*/;
+                -moz-text-decoration-color: /*[[oCSS.highlight]]*/;
+            }
+            PRE.i:before {
+                content: "[";
+            }
+            PRE.i:after {
+                content: "]";
+            }
+            PRE STRONG {
+                background-color: /*[[oCSS.highlight]]*/;
+            }
 
             .splash {
                 padding: 0 0 2% 0;
                 text-align: center;
             }
-                .splash H1 {
-                    margin-top: /*{{oCSS.splash.h1_marginTop}}*/;
-                }
-                .splash H1 > SPAN {
-                    font-family: /*{{oCSS.$fonts.ugly}}*/;
-                    font-size: 80%;
-                    display: inline-block;
-                    margin: /*{{oCSS.splash.h1_span_marginTop}}*/ -0.08em 0 -0.17em;
-                    -webkit-transform: rotate(-15deg);
-                    -o-transform: rotate(-15deg);
-                    transform: rotate(-15deg);
-                }
-                    .splash H1 > SPAN > SPAN {
-                        font-size: 50%;
-                        color: /*{{oCSS.mainColor}}*/;
-                    }
-                .splash .tagline {
-                    font-size: 150%;
-                    margin: -0.4em 0 0 0;
-                    text-align: center;
-                }
+            .splash H1 {
+                margin-top: /*[[oCSS.splash.h1_marginTop]]*/;
+            }
+            .splash H1 > SPAN {
+                font-family: /*[[oCSS.$fonts.ugly]]*/;
+                font-size: 80%;
+                display: inline-block;
+                margin: /*[[oCSS.splash.h1_span_marginTop]]*/ -0.08em 0 -0.17em;
+                -webkit-transform: rotate(-15deg);
+                -o-transform: rotate(-15deg);
+                transform: rotate(-15deg);
+            }
+            .splash H1 > SPAN > SPAN {
+                font-size: 50%;
+                color: /*[[oCSS.mainColor]]*/;
+            }
+            .splash .tagline {
+                font-size: 150%;
+                margin: -0.4em 0 0 0;
+                text-align: center;
+            }
 
             .overview,
             .options,
@@ -251,126 +253,133 @@
             }
 
             .about {
-                background-color: /*{{oCSS.mainColor}}*/;
-                color: /*{{oCSS.about.color}}*/;
+                background-color: /*[[oCSS.mainColor]]*/;
+                color: /*[[oCSS.about.color]]*/;
             }
-                .about > P:first-of-type {
-                    margin-top: 0;
-                }
-                .about A {
-                    color: /*{{oCSS.about.a}}*/;
-                }
-                    .about A:hover {
-                        border-bottom: 1px solid /*{{oCSS.about.a}}*/;
-                    }
+            .about > P:first-of-type {
+                margin-top: 0;
+            }
+            .about A {
+                color: /*[[oCSS.about.a]]*/;
+            }
+            .about A:hover {
+                border-bottom: 1px solid /*[[oCSS.about.a]]*/;
+            }
 
 
             .gettingstarted {
-                background-color: /*{{oCSS.gettingStarted.backgroundColor}}*/;
-                color: /*{{oCSS.gettingStarted.color}}*/;
+                background-color: /*[[oCSS.gettingStarted.backgroundColor]]*/;
+                color: /*[[oCSS.gettingStarted.color]]*/;
             }
-                .gettingstarted BLOCKQUOTE {
-                    color: black;
-                }
-                .gettingstarted A {
-                    color: /*{{oCSS.gettingStarted.a}}*/;
-                }
-                    .gettingstarted A:hover {
-                        border-bottom: 1px solid /*{{oCSS.gettingStarted.a}}*/;
-                    }
+            .gettingstarted BLOCKQUOTE {
+                color: black;
+            }
+            .gettingstarted A {
+                color: /*[[oCSS.gettingStarted.a]]*/;
+            }
+            .gettingstarted A:hover {
+                border-bottom: 1px solid /*[[oCSS.gettingStarted.a]]*/;
+            }
 
             .gotchas {
-                background-color: /*{{oCSS.gotchas.backgroundColor}}*/;
-                color: /*{{oCSS.gotchas.color}}*/;
+                background-color: /*[[oCSS.gotchas.backgroundColor]]*/;
+                color: /*[[oCSS.gotchas.color]]*/;
             }
-                .gotchas A {
-                    color: /*{{oCSS.gotchas.a}}*/;
-                }
-                    .gotchas A:hover {
-                        border-bottom: 1px solid /*{{oCSS.gotchas.a}}*/;
-                    }
+            .gotchas A {
+                color: /*[[oCSS.gotchas.a]]*/;
+            }
+            .gotchas A:hover {
+                border-bottom: 1px solid /*[[oCSS.gotchas.a]]*/;
+            }
 
             .overview {
-                background-color: /*{{oCSS.overview.backgroundColor}}*/;
-                color: /*{{oCSS.overview.color}}*/;
+                background-color: /*[[oCSS.overview.backgroundColor]]*/;
+                color: /*[[oCSS.overview.color]]*/;
             }
-                .overview UL LI {
-                    width: 48%;
-                }
-                    .overview UL LI:nth-of-type(odd) {
-                        float: left;
-                        clear: left;
-                    }
-                    .overview UL LI:nth-of-type(even) {
-                        float: right;
-                        clear: right;
-                    }
-                    .overview UL LI STRONG {
-                        text-transform: uppercase;
-                    }
-                .overview A {
-                    color: /*{{oCSS.overview.a}}*/;
-                }
-                    .overview A:hover {
-                        border-bottom: 1px solid /*{{oCSS.overview.a}}*/;
-                    }
+            .overview UL LI {
+                width: 48%;
+            }
+            .overview UL LI:nth-of-type(odd) {
+                float: left;
+                clear: left;
+            }
+            .overview UL LI:nth-of-type(even) {
+                float: right;
+                clear: right;
+            }
+            .overview UL LI STRONG {
+                text-transform: uppercase;
+            }
+            .overview A {
+                color: /*[[oCSS.overview.a]]*/;
+            }
+            .overview A:hover {
+                border-bottom: 1px solid /*[[oCSS.overview.a]]*/;
+            }
 
             .options .column {
                 width: 48%;
             }
-                .options > DIV.c1of2 {
-                    float: left;
-                }
-                .options > DIV.c2of2 {
-                    float: right;
-                }
-                .options .column > H3 {
-                    margin: 4% 0 1.5% 0;
-                }
-                .options .column EM {
-                    display: block;
-                    margin: 0 0 0 3%;
-                }
-                    .options .column EM:last-of-type:before {
-                        content: "Default Value: ";
-                    }
-                    .options .column EM:last-of-type {
-                        margin-bottom: 2%;
-                    }
-                .options .note {
-                    font-style: italic;
-                    font-size: 90%;
-                    margin-top: 2%;
-                }
-                    .options .note:before {
-                        content: "NOTE: ";
-                    }
+            .options > DIV.c1of2 {
+                float: left;
+            }
+            .options > DIV.c2of2 {
+                float: right;
+            }
+            .options .column > H3 {
+                margin: 4% 0 1.5% 0;
+            }
+            .options .column EM {
+                display: block;
+                margin: 0 0 0 3%;
+            }
+            .options .column EM:last-of-type:before {
+                content: "Default Value: ";
+            }
+            .options .column EM:last-of-type {
+                margin-bottom: 2%;
+            }
+            .options .note {
+                font-style: italic;
+                font-size: 90%;
+                margin-top: 2%;
+            }
+            .options .note:before {
+                content: "NOTE: ";
+            }
 
             BLOCKQUOTE {
-                background: none repeat scroll 0 0 /*{{oColors.gray}}*/;
+                background: none repeat scroll 0 0 /*[[oColors.gray]]*/;
                 border-radius: 10px;
                 padding: 1% 2%;
                 max-width: 750px;
             }
 
             em.comment {
-                color: /*{{oColors.darkGreen}}*/;
+                color: /*[[oColors.darkGreen]]*/;
             }
             em.script {
-                color: /*{{oColors.red}}*/;
+                color: /*[[oColors.red]]*/;
             }
-            em.ng:after {
-                content: "}}";
+            VAR:
+            .var-end:after,
+            .var:after {
+                content: "\5D\5D";
             }
-                em.ng:before {
-                    content: "{{";
-                }
+            VAR,
+            .var-start:after,
+            .var:before {
+                content: "\5B\5B";
+            }
+            .strike {
+                text-decoration: line-through;
+            }
         </style>
 
         <script>
             //# Safely converts "rgb(x,x,x)" into "#xxxxxx"
             function rgb2hex(rgb) {
-                if (/^#[0-9A-F]{6}$/i.test(rgb)) return rgb;
+                if (!rgb || /^#[0-9A-F]{6}$/i.test(rgb)) return rgb;
 
                 rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
                 function hex(x) {
@@ -402,7 +411,7 @@
                             iTimeoutID = setTimeout(fnAutoClick, 1500);
                         }
                     }
-                ;
+                    ;
 
                 //# Kickoff the demo
                 fnAutoClick();
@@ -415,9 +424,9 @@
                     oFonts = window.cjsss.temp.oFonts,
                     oColors = window.cjsss.temp.oColors,
                     oColorSets = window.cjsss.temp.oColorSets,
-                    $cj = document.getElementById("cj"),
+                    //$cj = document.getElementById("cj"),
                     $ul = document.getElementById("demo").children
-                ;
+                    ;
 
                 //# Traverse the $ul, removing .active as we go
                 for (i = 0; i < $ul.length; i++) {
@@ -431,44 +440,44 @@
 
                 //# 
                 switch (oCSS.mainColor) {
-                    case oColors.brown: {
-                        oCSS.highlight = oColors.lightBrown;
+                case oColors.brown: {
+                    oCSS.highlight = oColors.lightBrown;
 
-                        oCSS.$fonts.pretty = oFonts.Arial;
-                        oCSS.$fonts.ugly = oFonts.ComicSans;
-                        oCSS.about.color = "white";
-                        oCSS.about.a = oColors.yellow;
-                        oCSS.splash.h1_span_marginTop = "-1.7em";
-                        oCSS.splash.h1_marginTop = "1%";
-                        oCSS.overview = oColorSets.brown;
-                        oCSS.gettingStarted = oColorSets.blue;
-                        oCSS.gotchas = oColorSets.green;
-                        break;
-                    }
-                    case oColors.yellow: {
-                        oCSS.$fonts.pretty = oFonts.Helvetica;
-                        oCSS.$fonts.ugly = oFonts.ComicSans;
-                        oCSS.about.color = "black";
-                        oCSS.about.a = oColors.red;
-                        oCSS.splash.h1_span_marginTop = "-1.7em";
-                        oCSS.splash.h1_marginTop = "0.9%";
-                        oCSS.overview = oColorSets.blue;
-                        oCSS.gettingStarted = oColorSets.green;
-                        oCSS.gotchas = oColorSets.brown;
-                        break;
-                    }
-                    case oColors.pink: {
-                        oCSS.$fonts.pretty = oFonts.ComicSans;
-                        oCSS.$fonts.ugly = oFonts.Helvetica;
-                        oCSS.about.color = "black";
-                        oCSS.about.a = oColors.red;
-                        oCSS.splash.h1_span_marginTop = "-1.5em";
-                        oCSS.splash.h1_marginTop = "0";
-                        oCSS.overview = oColorSets.green;
-                        oCSS.gettingStarted = oColorSets.brown;
-                        oCSS.gotchas = oColorSets.blue;
-                        break;
-                    }
+                    oCSS.$fonts.pretty = oFonts.Arial;
+                    oCSS.$fonts.ugly = oFonts.ComicSans;
+                    oCSS.about.color = "white";
+                    oCSS.about.a = oColors.yellow;
+                    oCSS.splash.h1_span_marginTop = "-1.7em";
+                    oCSS.splash.h1_marginTop = "1%";
+                    oCSS.overview = oColorSets.brown;
+                    oCSS.gettingStarted = oColorSets.blue;
+                    oCSS.gotchas = oColorSets.green;
+                    break;
+                }
+                case oColors.yellow: {
+                    oCSS.$fonts.pretty = oFonts.Helvetica;
+                    oCSS.$fonts.ugly = oFonts.ComicSans;
+                    oCSS.about.color = "black";
+                    oCSS.about.a = oColors.red;
+                    oCSS.splash.h1_span_marginTop = "-1.7em";
+                    oCSS.splash.h1_marginTop = "0.9%";
+                    oCSS.overview = oColorSets.blue;
+                    oCSS.gettingStarted = oColorSets.green;
+                    oCSS.gotchas = oColorSets.brown;
+                    break;
+                }
+                case oColors.pink: {
+                    oCSS.$fonts.pretty = oFonts.ComicSans;
+                    oCSS.$fonts.ugly = oFonts.Helvetica;
+                    oCSS.about.color = "black";
+                    oCSS.about.a = oColors.red;
+                    oCSS.splash.h1_span_marginTop = "-1.5em";
+                    oCSS.splash.h1_marginTop = "0";
+                    oCSS.overview = oColorSets.green;
+                    oCSS.gettingStarted = oColorSets.brown;
+                    oCSS.gotchas = oColorSets.blue;
+                    break;
+                }
                 }
 
                 //#
@@ -486,16 +495,17 @@
             <h1>
                 C<span><span>&lt;</span>js<span>&gt;</span></span>SS.js
             </h1>
-            <span class="tagline">Next Generation CSS Preprocessor | Reprocessor</span>
+            <span class="tagline">Use Javascript In Your CSS</span>
 
             <br/><img src="img/cj.png" id="cj" />
-            <ul id="demo"><!-- #554233 #d4c668 #c695cf  /*{{oColors.brown}}*/  -->
-                <li style="background-color: /*{{oColors.brown}}*/;" cjsss="#myCss" onclick="mutateCSS(this)"></li>
-                <li style="background-color: /*{{oColors.yellow}}*/;" cjsss="#myCss" onclick="mutateCSS(this)" class="active"></li>
-                <li style="background-color: /*{{oColors.pink}}*/;" cjsss="#myCss" onclick="mutateCSS(this)"></li>
+            <ul id="demo"><!-- #554233 #d4c668 #c695cf  /*[[oColors.brown]]*/  -->
+                <li style="background-color: /*[[oColors.brown]]*/;" cjsss="#myCss" onclick="mutateCSS(this)"></li>
+                <li style="background-color: /*[[oColors.yellow]]*/;" cjsss="#myCss" onclick="mutateCSS(this)" class="active"></li>
+                <li style="background-color: /*[[oColors.pink]]*/;" cjsss="#myCss" onclick="mutateCSS(this)"></li>
             </ul>
 
-            <span class="tagline">You <em>already</em> know both languages (and you only hate <em>one</em> of them)!</span>
+            <span class="tagline">Bind Javascript Variables & Functions In CSS</span>
+            <!--<span class="tagline">You <em>already</em> know both languages (and you only hate <em>one</em> of them)!</span>-->
             <!--<span class="tagline">Like that hot girl in highschool; <span class="pretty">pretty</span> on the outside but <span class="ugly">ugly</span> on the inside.</span>-->
         </div>
         
@@ -508,7 +518,7 @@
                 <li><a href="#browsersupport"><strong>Browser Support:</strong></a> IE8+ <em>(or IE6+ with optional cjsss.polyfill.js or <a href="http://www.jquery.com/">jQuery</a>)</em></li>
                     <li><strong>Licensing Fees:</strong> $0, nada, nutin' (licensed under the <a href="http://opensource.org/licenses/MIT">MIT License</a>) but <a href="#about">Nick does accept tips</a></li>
                 <li><strong>Installation:</strong> n/a, just include <pre>cjsss.min.js</pre> <em>(<a href="http://nodejs.org/">Node.js</a> optional for server-side preprocessing)</em></li>
-                    <li><strong>Tiny!</strong> Only ~3,300 bytes compressed</li>
+                    <li><strong>Tiny!</strong> Only ~3,600 bytes compressed</li>
 
                 <li>Near-zero learning curve; it's just Javascript embedded within CSS!</li>
                     <li>Your CSS stays CSS, no language features to learn or mentally decode</li>
@@ -520,7 +530,7 @@
                     <li><pre>eval</pre>uated Javascript fully sandboxed by default</li>
                 <li>Use any Javascript library within your CSS, not just language supported functions</li>
                     <li>Supports external <pre>SCRIPT</pre> references within the CSS (e.g. <pre>&lt;script src='<a href="https://github.com/gka/chroma.js">https://github.com/gka/chroma.js</a>'&gt;&lt;/script&gt;</pre>).</li>
-                <li>Ability to use <pre>{{Variable}}</pre>s within <pre>style</pre> attributes</li>
+                <li>Ability to use <pre class="var">Variable</pre>s within <pre>style</pre> attributes</li>
                     <li>~550 lines of source code are fully commented and accessible to the brave and not-so-brave alike</li>
             </ul>
             <img src="img/twistedsister.png" style="position: absolute; width: 7%; left: 1%; margin-top: -0.7%;" alt="Our (twisted) sister project: ngCss" />
@@ -531,52 +541,117 @@
         <div class="options cf">
             <h2>Options</h2>
             <div class="cf">
-                Option values can be passed into CjsSS.js at a number of points:
+                Option values can be passed into CjsSS.js in a number of locations:
                 <ol>
                     <li>
-                        <pre>&lt;script&gt; cjsss.process("[cjsss]", <strong>{ crlf: "\n" }</strong>); &lt;/script&gt;</pre>
+                        <pre>&lt;div style="color: <span class='var'>color</span>;" <strong>cjsss="{ scope: '#myCss', async: false }"</strong>&gt;...&lt;/div&gt;</pre>
                         <br/>overrides:
                     </li>
                     <li>
-                        <pre>&lt;style type="text/css" <strong>cjsss='{ "crlf": "\r\n" }'</strong> /&gt;</pre>
-                        &nbsp; or &nbsp;
-                        <pre>&lt;link rel="stylesheet" type="text/css" href="css/site.css" <strong>cjsss='{ "crlf": "\r\n" }'</strong> /&gt;</pre>
-                        <br/>override:
+                        <pre>&lt;style type="text/css" id="myCss" <strong>cjsss="{ async: true }"</strong> /&gt;...&lt;/style&gt;</pre>
+                        <br/>or
+                        <br/><pre>&lt;link rel="stylesheet" type="text/css" id="myCss" href="css/site.css" <strong>cjsss="{ async: true }"</strong> /&gt;</pre>
+                        <br/>overrides:
                     </li>
                     <li>
-                        The default values described below (<a href="#override">which can be overridden</a>).
+                        When placed on the first line within the CSS, <pre><strong>/*cjsss({ async: false })*/</strong></pre>
+                        <br/>overrides:
+                    </li>
+                    <li>
+                        The default values described below (<a href="#override">which can be programmatically overridden</a>).
                     </li>
                 </ol>
-                In the example above, <pre>crlf</pre> will be set to <pre>\n</pre> as the <pre>cjsss.process()</pre> call's option values override the <pre>STYLE</pre> / <pre>LINK</pre> tags' option values (<pre>\r\n</pre>) and the default value (a <pre>null-string</pre>).
+                In the example above, <pre>options.async</pre> will be set to <pre>false</pre> within the context of the <pre>DIV</pre> as the <pre>DIV</pre> tag's option values override the <pre>STYLE</pre> / <pre>LINK</pre> tags' option values.
+                <pre>options.async</pre> will be set to <pre>true</pre> within the context of the <pre>STYLE</pre> / <pre>LINK</pre> tags' which overrides the CSS's inline option values.
+                <pre>options.async</pre> was set to <pre>false</pre> within the CSS's inline option values which would have overriden the default value (<pre>true</pre>), but it never takes effect due to the <pre>STYLE</pre> / <pre>LINK</pre> tags' option values.
+            
+                <div class="note">
+                    The use of the CSS's inline option values (#3) allows you to fully configure all aspects of CjsSS.js within the CSS itself.
+                </div>
             </div>
-
+            
             <div class="column c1of2">
                 <h3>scope</h3>
                 <div>
-                    <em>STRING (Enumeration, see below)</em>
-                    <em>sandbox</em>
-                    The scope that the CjsSS.js-embedded Javascript will be <pre>eval</pre>uated within:
+                    <em>VARIANT (see valid values below)</em>
+                    <em>"isolated"</em>
+                    The <a href="http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/">Javascript scope</a> that the CSS embedded <pre>SCRIPT</pre> tags will be <pre>eval</pre>uated within:
                     <ul>
                         <li>
-                            <pre>sandbox</pre> - isolated scope.
-                            Code is evaluated within a detached <pre>IFRAME</pre> with zero access to any of the host page's resources.<a href="#*">*</a>
-                        </li>
-                        <!--
-                            <li>
-                                <pre class="i">this</pre> - isolated scope with the context (<pre>this</pre>) set to the provided value.
-                                Code is evaluated within a detached <pre>IFRAME</pre> with access to the provided value but with zero access to any of the host page's other resources.<a href="#*">*</a>
-                            </li>
-                        -->
-                        <li>
-                            <pre>local</pre> - non-"use strict" closure scope.
-                            Code is evaluated within the host page with full access to global resources, but once execution is complete embedded Javascript resources are no longer accessable (unless explicitly set within the global scope).
+                            <pre>false</pre> -
+                            CSS embedded <pre>SCRIPT</pre> tags are not evaluated.
                         </li>
                         <li>
-                            <pre>global</pre> - non-"use strict" global scope.
-                            Code is evaluated within the host page's global scope with full access to its global resources, allowing embedded Javascript resources to persist within the global scope.
+                            <pre>"isolated"</pre> -
+                            a new <a href='http://www.html5rocks.com/en/tutorials/security/sandboxed-iframes/'>isolated <pre>IFRAME</pre> Javascript scope</a>.
                         </li>
+                        <li class="strike">
+                            <pre>"sandbox"</pre> -
+                            a new <a href='http://www.html5rocks.com/en/tutorials/security/sandboxed-iframes/#privilege-separation'><pre>sandbox</pre>ed <pre>IFRAME</pre> Javascript scope</a>. <a href="#*">&dagger;</a>
+                        </li>
+                        <li>
+                            <pre>"global"</pre> -
+                            the <a href='http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/'>global Javascript scope</a>.
+                        </li>
+                        <li>
+                            <pre>"local"</pre> -
+                            a new <a href='http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/'>local (closure) Javascript scope</a>.
+                        </li>
+                        <li>
+                            <pre>"useStrict"</pre> -
+                            a new <a href='https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode#Simplifying_variable_uses'>"use strict" local (closure) Javascript scope</a>.
+                        </li>
+                        <li class="strike">
+                            <pre>"json"</pre> -
+                            as <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON-style object definitions</a> (both keys and values are "double quoted"); no Javascript scope applies.
+                        </li>
+                        <li>
+                            <pre>"#ID"</pre> -
+                            the <a href='http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/'>Javascript scope</a> in effect for the referenced <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/id">HTML Element.id</a> <!--(e.g. <pre>document.querySelector('#ID');</pre>)--> will be used. <a href="#**">&Dagger;</a>
+                        </li>
+                        <li>
+                            <pre class="i">object</pre> -
+                            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Javascript Objects</a> can be provided in a number of flavors:
+                            <ul>
+                                <li>
+                                    <a href="https://docs.angularjs.org/api/ng/function/angular.element">angular.element</a>, <a href="http://api.jquery.com/jQuery/">jQuery</a> or <a href="https://developer.mozilla.org/en-US/docs/Web/API/element">DOM element</a> - 
+                                    the <a href='http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/'>Javascript scope</a> in effect for the referenced <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element">HTML Element</a> will be used. <a href="#**">&Dagger;</a>
+                                </li>
+                                <li>
+                                    <pre>{ script: <pre class="i">variant</pre>, context: <pre class="i">object</pre> }</pre> -
+                                    <pre>script</pre><a href="#***">*</a> resolves to either <pre>"local"</pre> or <pre>"useStrict"</pre> and <pre>context</pre> is provided as <a href="http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/"><pre>this</pre></a> within the evaluated Javascript.
+                                </li>
+                                <li>
+                                    otherwise -
+                                    <pre class="i">object</pre> is provided as <a href="http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/"><pre>this</pre></a> within a new <a href='http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/'><pre>"local"</pre> (closure) Javascript scope</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <pre class="i">function</pre> -
+                            a <a href="#****">function**</a> that returns a <pre>variant</pre> representing any of the listed values.
+                        </li>
+                        <!--<li>
+                                <pre class="i">function</pre> -
+                                a <a href="#****">function**</a> present in the <a href='http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/'>global Javascript scope</a> (e.g. <pre>window.myFunction</pre>) that returns a <pre>variant</pre> representing any of the listed values.
+                            </li>-->
                     </ul>
                 </div>
+
+
+                <h3>selector</h3>
+                <div>
+                    <em>STRING (CSS Selector)</em>
+                    <em>[cjsss],[data-cjsss]</em>
+                    The <pre>selector</pre> option defines the CSS selector to use by default.
+                    This <pre>selector</pre> is used when CjsSS.js autoruns and when <pre>cjsss.process()</pre> is called without any <pre>vElements</pre> defined.
+                    If you wish to disable autorun you must <a href="#override">override the default value</a>, resetting it to "" (a <pre>null-string</pre>).
+
+                    <div class="note">
+                        <strong>In-line <pre>selector</pre> values set on <pre>LINK</pre> or <pre>STYLE</pre> tags are ignored</strong> because the tags have already been selected by this point in the lifecycle.
+                    </div>
+                </div>
+
 
                 <h3>expose</h3>
                 <div>
@@ -604,106 +679,187 @@
                         If you wish to remove <pre>window.cjsss</pre> after it has been exposed, you can use the <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/delete"><pre>delete</pre> operator</a> (e.g. <pre>delete window.cjsss;</pre>).
                     </div>
                 </div>
-
-                <h3>selector</h3>
-                <div>
-                    <em>STRING (CSS Selector)</em>
-                    <em>[cjsss],[data-cjsss]</em>
-                    The <pre>selector</pre> option defines the CSS selector to use by default.
-                    This <pre>selector</pre> is used when CjsSS.js autoruns and when <pre>cjsss.process()</pre> is called without any <pre>vElements</pre> defined.
-                    If you wish to disable autorun you must <a href="#override">override the default value</a>, resetting it to "" (a <pre>null-string</pre>).
-
-                    <div class="note">
-                        <strong>In-line <pre>selector</pre> values set on <pre>LINK</pre> or <pre>STYLE</pre> tags are ignored</strong> because the tags have already been selected by this point in the lifecycle.
-                    </div>
-                </div>
             </div>
+
             <div class="column c2of2">
                 <h3>optionScope</h3>
                 <div>
-                    <em>STRING (Enumeration, see below)</em>
-                    <em>json</em>
-                    Specifies how the in-line options defined within the <pre>LINK</pre> and <pre>STYLE</pre> tags' <pre>cjsss</pre> attributes are to be parsed:
+                    <em>VARIANT (see valid values below)</em>
+                    <em>"json"</em>
+                    The <a href="http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/">Javascript scope</a> that the CSS embedded <pre>SCRIPT</pre> tags will be <pre>eval</pre>uated within:
                     <ul>
-                        <li>
-                            <pre>json</pre> - as <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON-style object definitions</a> (both keys and values are "double quoted").
+                        <li class="ngcss">
+                            <pre>false</pre> -
+                            CSS embedded <pre>SCRIPT</pre> tags are not evaluated.
                         </li>
                         <li>
-                            <pre>sandbox</pre> - isolated scope.
-                            Option code is evaluated within a detached <pre>IFRAME</pre> with zero access to any of the host page's resources.<a href="#*">*</a>
+                            <pre>"isolated"</pre> -
+                            a new <a href='http://www.html5rocks.com/en/tutorials/security/sandboxed-iframes/'>isolated <pre>IFRAME</pre> Javascript scope</a>.
                         </li>
-                        <!--
-                            <li>
-                                <pre class="i">object</pre> - isolated scope with the context (<pre>this</pre>) set to the provided <pre>object</pre>.
-                                Option code is evaluated within a detached <pre>IFRAME</pre> with access to the provided <pre>object</pre> but with zero access to any of the host page's other resources.<a href="#*">*</a>
-                            </li>
-                        -->
-                        <li>
-                            <pre>local</pre> - non-"use strict" closure scope.
-                            Option code is evaluated within the host page with full access to global resources, but once execution is complete embedded Javascript resources are no longer accessable (unless explicitly set within the global scope).
+                        <li class="strike">
+                            <pre>"sandbox"</pre> -
+                            a new <a href='http://www.html5rocks.com/en/tutorials/security/sandboxed-iframes/#privilege-separation'><pre>sandbox</pre>ed <pre>IFRAME</pre> Javascript scope</a>. <a href="#*">&dagger;</a>
                         </li>
                         <li>
-                            <pre>global</pre> - non-"use strict" global scope.
-                            Option code is evaluated within the host page's global scope with full access to its global resources, allowing embedded Javascript resources to persist within the global scope.
+                            <pre>"global"</pre> -
+                            the <a href='http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/'>global Javascript scope</a>.
                         </li>
+                        <li>
+                            <pre>"local"</pre> -
+                            a new <a href='http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/'>local (closure) Javascript scope</a>.
+                        </li>
+                        <li>
+                            <pre>"useStrict"</pre> -
+                            a new <a href='https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode#Simplifying_variable_uses'>"use strict" local (closure) Javascript scope</a>.
+                        </li>
+                        <li>
+                            <pre>"json"</pre> -
+                            as <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON-style object definitions</a> (both keys and values are "double quoted"); no Javascript scope applies.
+                        </li>
+                        <li>
+                            <pre>"#ID"</pre> -
+                            the <a href='http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/'>Javascript scope</a> in effect for the referenced <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/id">HTML Element.id</a> <!--(e.g. <pre>document.querySelector('#ID');</pre>)--> will be used. <a href="#**">&Dagger;</a>
+                        </li>
+                        <li>
+                            <pre class="i">object</pre> -
+                            <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Javascript Objects</a> can be provided in a number of flavors:
+                            <ul>
+                                <li>
+                                    <a href="https://docs.angularjs.org/api/ng/function/angular.element">angular.element</a>, <a href="http://api.jquery.com/jQuery/">jQuery</a> or <a href="https://developer.mozilla.org/en-US/docs/Web/API/element">DOM element</a> - 
+                                    the <a href='http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/'>Javascript scope</a> in effect for the referenced <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element">HTML Element</a> will be used. <a href="#**">&Dagger;</a>
+                                </li>
+                                <li>
+                                    <pre>{ script: <pre class="i">variant</pre>, context: <pre class="i">object</pre> }</pre> -
+                                    <pre>script</pre><a href="#***">*</a> resolves to either <pre>"local"</pre> or <pre>"useStrict"</pre> and <pre>context</pre> is provided as <a href="http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/"><pre>this</pre></a> within the evaluated Javascript.
+                                </li>
+                                <li>
+                                    otherwise -
+                                    <pre class="i">object</pre> is provided as <a href="http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/"><pre>this</pre></a> within a new <a href='http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/'><pre>"local"</pre> (closure) Javascript scope</a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <pre class="i">function</pre> -
+                            a <a href="#****">function**</a> that returns a <pre>variant</pre> representing any of the listed values.
+                        </li>
+                        <!--<li>
+                                <pre class="i">function</pre> -
+                                a <a href="#****">function**</a> present in the <a href='http://toddmotto.com/everything-you-wanted-to-know-about-javascript-scope/'>global Javascript scope</a> (e.g. <pre>window.myFunction</pre>) that returns a <pre>variant</pre> representing any of the listed values.
+                        </li>-->
                     </ul>
                     <div class="note">
                         <strong>In-line <pre>optionScope</pre> values set on <pre>LINK</pre> or <pre>STYLE</pre> tags are ignored</strong> because the options have already been parsed by this point in the lifecycle.
                     </div>
                 </div>
 
-                <h3>crlf</h3>
+                
+                <h3>callback</h3>
                 <div>
-                    <em>STRING</em>
-                    <em>"" (a null-string)</em>
-                    Character(s) to append onto the end of each line of .css/.mixin-processed CSS.
+                    <em>FUNCTION</em>
+                    <em>undefined</em>
+                    Defines the <a href="#****">function**</a> that will be called each time the CSS is updated.
+                    You can disable the callback by returning <pre>false</pre> from the function.
                 </div>
+                
 
                 <h3>async</h3>
                 <div>
                     <em>BOOLEAN</em>
                     <em>true</em>
                     Specifies if <pre>LINK</pre> tags are to be processed asynchronously.
+                    If ordering matters in the execution of the embedded <pre>SCRIPT</pre>s, then this should be set to <pre>false</pre>.
                 </div>
+
 
                 <h3>d1</h3>
                 <div>
                     <em>STRING</em>
-                    <em>{{</em>
-                    Starting delimiter denoting embedded Javascript variables, e.g. <pre>color: /*<strong>{{</strong>mainColor}}/*</pre>.
+                    <em class="var-start"></em>
+                    Starting delimiter denoting embedded Javascript variables, e.g. <pre>color: /*<strong class="var-start"></strong>mainColor]]/*</pre>.
                     <div class="note">
-                        Adjacent leading CSS comment syntax (e.g. <pre><strong>/*</strong>{{</pre>) is implicitly removed, allowing you to have easier to maintain CSS.
+                        Adjacent leading CSS comment syntax (e.g. <pre><strong>/*</strong>[[</pre>) is implicitly removed.
                     </div>
                 </div>
+
 
                 <h3>d2</h3>
                 <div>
                     <em>STRING</em>
-                    <em>}}</em>
-                    Ending delimiter denoting embedded Javascript variables, e.g. <pre>color: /*{{mainColor<strong>}}</strong>/*</pre>.
+                    <em class="var-end"></em>
+                    Ending delimiter denoting embedded Javascript variables, e.g. <pre>color: /*[[mainColor<strong>]]</strong>/*</pre>.
                     <div class="note">
-                        Adjacent trailing CSS comment syntax (e.g. <pre>}}<strong>*/</strong></pre>) is implicitly removed, allowing you to have easier to maintain CSS.
+                        Adjacent trailing CSS comment syntax (e.g. <pre>]]<strong>*/</strong></pre>) is implicitly removed.
+                    </div>
+                    <div class="note">
+                        <pre>d1</pre> and <pre>d2</pre> must contain non null-string values and be different; e.g. <pre><strong>$</strong>mainColor</pre> nor <pre><strong>%</strong>mainColor<strong>%</strong></pre> are valid.
                     </div>
                 </div>
             </div>
 
             <div style="clear: both; padding-top: 1%;">
                 <a name="*"></a>
-                * The <pre>IFRAME</pre>'s <pre>window.parent</pre> is set to <pre>null</pre>.
+                &dagger; - There is no reason to use <pre>sandbox</pre> over <pre>isolated</pre> if your CSS embedded <pre>SCRIPT</pre> tags are from a trusted source, especially considering the limitations of <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">postMessage</a>.
+
+                <br /><a name="**"></a>
+                &Dagger; - Allows for the sharing of functionality and variables across invocations.
+
+                <br /><a name="***"></a>
+                * - <pre><pre class="i">object</pre>.script</pre> must create a new Javascript scope; it cannot link to an existing scope.
+
+                <br /><a name="****"></a>
+                ** - <pre class="i">function</pre>s are passed 2 arguments:
+                <ol>
+                    <li>
+                        <pre>domElement</pre> -
+                        the directive's <a href="https://developer.mozilla.org/en-US/docs/Web/API/element">DOM element</a>.
+                    </li>
+                    <li>
+                        <pre>metadata</pre> -
+                        an object representing the internal metadata pertaining to the element.
+                    </li>
+                </ol>
+
+                <div class="note">
+                    Each <pre>cjsss</pre> attributed <pre>LINK</pre> tag is replaced with a <pre>STYLE</pre> tag with only the <pre>cjsss</pre> attribute copied across.
+                    If you require additional attributes or processing to apply to these created <pre>STYLE</pre> tags, you can make any necessary modifications to the <a href="https://developer.mozilla.org/en-US/docs/Web/API/element">DOM element</a> within a <pre class="i">function</pre>.
+                </div>
+
+                <!--<div class="note">
+                    Options settings can reference properties in the <a href="https://docs.angularjs.org/guide/directive">context of the original Angular scope</a>, but <strong>not</strong> within the Angular scope created/imported via <pre>options.scope</pre>.
+                </div>-->
             </div>
+
+
+            <h3><pre>style</pre> Attributes</h3>
+            <pre class="var">Variable</pre>s can be used within any tag's <pre>style</pre> attribute (but <pre>SCRIPT</pre> tags are not permitted).
+            When applying ngCss to a <pre>style</pre> attribute, you have two options when setting the value of <pre>cjsss</pre>'s in-line options:
+            <ul>
+                <li>
+                    <pre><pre>&lt;div style="color: <span class='var'>color</span>;" <strong>cjsss="#myCss"</strong>&gt;...&lt;/div&gt;</pre></pre>
+                    <br/>This will import the <a href="https://docs.angularjs.org/guide/scope">Angular <pre>$scope</pre></a> and option values from the referenced <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/id">HTML Element</a> with the ID <i>myCss</i> (e.g. "<i>#myCss</i>" overrides <pre>options.scope</pre>).
+                    This element <i>should</i> be a <pre>cjsss</pre> attributed <pre>LINK</pre> or <pre>STYLE</pre> tag, but any Angular element's <pre>$scope</pre> can be imported.
+                </li>
+                <li>
+                    <pre><pre>&lt;div style="color: <span class='var'>color</span>;" <strong>cjsss="{ scope: '#myCss', live: true }"</strong>&gt;...&lt;/div&gt;</pre></pre>
+                    <br/>This will also import the <a href="https://docs.angularjs.org/guide/scope">Angular <pre>$scope</pre></a>/option values from ID <i>myCss</i> while overriding the value of <pre>options.live</pre> to <pre>true</pre>.
+                    This is useful when you want to use a <pre class="var">Variable</pre> within your <pre>style</pre> attribute but do not require it to be live-bound like its source (as used in 2 of the 3 <a href="#profiles">color profile selection boxes</a> above to demonstrate the concept).
+                </li>
+            </ul>
+            Only the <pre>style</pre> attribute is effected by CjsSS.js in this context using a non-isolate <pre>$scope</pre> (even when the referenced element is!).
+            This is accomplished by a bit of pre- and post-<pre>$compile</pre> slight-of-hand between the directive's <pre>template</pre> and <pre>link</pre> functions and custom linking code via a <pre>$watch</pre> (<pre>live: true</pre>) or <pre>$on</pre> (<pre>live: false</pre>).
 
 
             <a name="override"></a>
             <h3>How To Override The Default Option Values</h3>
             If you wish to override any of the default option values, you must include a Javascript code block like the one below <strong>before</strong> CjsSS.js's <pre>SCRIPT</pre> tag:
             <blockquote>
-<pre>
-window.cjsss = {
-    options: {
-        <strong>key</strong>: <strong>value</strong>
-    }
-};
-</pre>
+                <pre>
+                window.cjsss = {
+                    options: {
+                        <strong>key</strong>: <strong>value</strong>
+                    }
+                };
+                </pre>
             </blockquote>
             Where <pre><strong>key</strong></pre> equals the option value you wish to reset and <pre><strong>value</strong></pre> equals the new default value.
         </div>
@@ -720,41 +876,41 @@ window.cjsss = {
                 <li>
                     Include the CjsSS.js <pre>SCRIPT</pre> tag(s) in the <pre>HEAD</pre> of your HTML document <strong>below</strong> any <pre>LINK</pre> / <pre>STYLE</pre> tags you want to process:
                     <blockquote>
-<pre>
-&lt;script type="text/javascript" src="<strong>cjsss-polyfill.js</strong>"&gt;&lt;/script&gt; <em class="comment">&lt;!-- IE6-7 support --&gt;</em>
-&lt;script type="text/javascript" src="<strong>cjsss.min.js</strong>"&gt;&lt;/script&gt;
-</pre>
+                        <pre>
+                        &lt;script type="text/javascript" src="<strong>cjsss-polyfill.js</strong>"&gt;&lt;/script&gt; <em class="comment">&lt;!-- IE6-7 support --&gt;</em>
+                        &lt;script type="text/javascript" src="<strong>cjsss.min.js</strong>"&gt;&lt;/script&gt;
+                        </pre>
                     </blockquote>
                 </li>
                 <li>
                     Add the <pre>cjsss</pre> attribute to the <pre>LINK</pre> and/or <pre>STYLE</pre> tags you want to process:
                     <blockquote>
-<pre>
-&lt;link rel="stylesheet" type="text/css" href="css/site.css" <strong>cjsss</strong>&gt;
-&lt;style type="text/css" <strong>cjsss</strong>&gt;<em class="comment">...</em>&lt;/style&gt;
-</pre>
+                        <pre>
+                        &lt;link rel="stylesheet" type="text/css" href="css/site.css" <strong>cjsss</strong>&gt;
+                        &lt;style type="text/css" <strong>cjsss</strong>&gt;<em class="comment">...</em>&lt;/style&gt;
+                        </pre>
                     </blockquote>
                 </li>
                 <li>
                     Define the <a href="#options"><pre>options</pre></a> used by CjsSS.js (if any) using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON-style object definitions</a> (both keys and values are "double quoted"):
                     <blockquote>
-<pre>
-&lt;style type="text/css" <strong>cjsss='{ "crlf": "\n" }'</strong>&gt;<em class="comment">...</em>&lt;/style&gt;
-&lt;link rel="stylesheet" type="text/css" href="css/site.css" <strong>cjsss='{ "crlf": "\n" }'</strong>&gt;
-</pre>
+                        <pre>
+                        &lt;style type="text/css" <strong>cjsss='{ "crlf": "\n" }'</strong>&gt;<em class="comment">...</em>&lt;/style&gt;
+                        &lt;link rel="stylesheet" type="text/css" href="css/site.css" <strong>cjsss='{ "crlf": "\n" }'</strong>&gt;
+                        </pre>
                     </blockquote>
                 </li>
                 <li>
                     Edit the CSS within the <pre>LINK</pre> and/or <pre>STYLE</pre> tags to use CjsSS.js like this:
                     <blockquote>
-<pre>
-<em class="comment">/*<em class="script">&lt;script&gt;
-    var mainColor = 'blue';
-&lt;/script&gt;</em>*/</em>
-DIV {
-    color: <em class="comment">/*<em class="script ng">mainColor</em>*/</em>;
-}
-</pre>
+                        <pre>
+                        <strong><em class="comment">/*<em class="script">&lt;script&gt;
+                            var mainColor = 'blue';
+                        &lt;/script&gt;</em>*/</em></strong>
+                        DIV {
+                            color: <strong><em class="comment">/*<em class="script var">mainColor</em>*/</em></strong>;
+                        }
+                        </pre>
                     </blockquote>
                 </li>
             </ol>
@@ -764,17 +920,17 @@ DIV {
             <h3>Advanced Configuration</h3>
             If you want to change any of CjsSS.js's default functionality, you will first need to disable <pre>autorun</pre> and <pre>expose</pre> the <pre>window.cjsss</pre> object (NOTE: <pre>expose</pre> happens auto-magicially when you disable <pre>autorun</pre>) like so:
             <blockquote>
-<pre>
-&lt;script&gt;
-    window.cjsss = {
-        options: {
-            <strong>selector</strong>: <strong>''</strong>, //# disables autorun
-            <strong>expose</strong>: <strong>true</strong>  //# exposes `window.cjsss`
-        }
-    };
-&lt;/script&gt;
-&lt;script type="text/javascript" src="<strong>cjsss.min.js</strong>"&gt;&lt;/script&gt; <!-- include CjsSS.js functionality -->
-</pre>
+                <pre>
+                <em class="script">&lt;script&gt;
+                    window.cjsss = {
+                        options: {
+                            <strong>selector</strong>: <strong>''</strong>, <em class="comment">//# disables autorun</em>
+                            <strong>expose</strong>: <strong>true</strong>  <em class="comment">//# exposes `window.cjsss`</em>
+                        }
+                    };
+                &lt;/script&gt;</em>
+                &lt;script type="text/javascript" src="<strong>cjsss.min.js</strong>"&gt;&lt;/script&gt; <em class="comment">&lt;!-- include CjsSS.js --&gt;</em>
+                </pre>
             </blockquote>
 
             When CjsSS.js is <pre>expose</pre>d, the following properties are made available under <pre>window.cjsss</pre>:
@@ -822,60 +978,59 @@ DIV {
             <h4>How To <pre>inject</pre> Custom Functionality</h4>
             Continuing on from the code above to disable <pre>autorun</pre>, <pre>cjsss.inject</pre> can be used to expose any Javascript variable or value to your CjsSS.js evaluated Javascript code:
             <blockquote>
-<pre>
-&lt;script&gt;
-    //# .inject a function named "invertColor"
-    <strong>cjsss.inject</strong>("invertColor", function(sHex) {
-        var r, g, b, sReturnVal;
+                <pre>
+                <em class="script">&lt;script&gt;
+                    <em class="comment">//# .inject a function named "invertColor"</em>
+                    <strong>cjsss.inject</strong>("invertColor", function(sHex) {
+                        var r, g, b, sReturnVal;
 
-        if (sHex.length === 7 && sHex.indexOf('#') === 0) {
-            r = "0" + (255 - parseInt(sHex.substr(1, 2), 16)).toString(16);
-            g = "0" + (255 - parseInt(sHex.substr(3, 2), 16)).toString(16);
-            b = "0" + (255 - parseInt(sHex.substr(5, 2), 16)).toString(16);
-            sReturnVal = "#" + r.substr(-2) + g.substr(-2) + b.substr(-2);
-        }
+                        if (sHex.length === 7 && sHex.indexOf('#') === 0) {
+                            r = "0" + (255 - parseInt(sHex.substr(1, 2), 16)).toString(16);
+                            g = "0" + (255 - parseInt(sHex.substr(3, 2), 16)).toString(16);
+                            b = "0" + (255 - parseInt(sHex.substr(5, 2), 16)).toString(16);
+                            sReturnVal = "#" + r.substr(-2) + g.substr(-2) + b.substr(-2);
+                        }
 
-        return sReturnVal;
-    });
+                        return sReturnVal;
+                    });
 
-    //# .inject an object named "userConfig"
-    var defaultColor = {
-        color: "green"
-    };
-    <strong>cjsss.inject</strong>("userConfig", defaultColor);
+                    <em class="comment">//# .inject an object named "userConfig"</em>
+                    var defaultColor = {
+                        color: "green"
+                    };
+                    <strong>cjsss.inject</strong>("userConfig", defaultColor);
 
-    //# .inject an object named "span"
-    var spanCss = {
-        backgroundColor: "red"
-        subObject: defaultColor
-    };
-    <strong>cjsss.inject</strong>("span", spanCss);
+                    <em class="comment">//# .inject an object named "span"</em>
+                    var spanCss = {
+                        backgroundColor: "red"
+                        subObject: defaultColor
+                    };
+                    <strong>cjsss.inject</strong>("span", spanCss);
 
-    //# .inject a string named "<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/text-transform">textTransform</a>"
-    <strong>cjsss.inject</strong>("textTransform", "capitalize");
+                    <em class="comment">//# .inject a string named "<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/text-transform">textTransform</a>"</em>
+                    <strong>cjsss.inject</strong>("textTransform", "capitalize");
 
-    //# Process the LINK / STYLE tags with a "cjsss" attribute and no oOptions
-    cjsss.process("[cjsss]", {});
-&lt;/script&gt;
+                    <em class="comment">//# Process the LINK / STYLE tags with a "cjsss" attribute and no oOptions</em>
+                    cjsss.process("[cjsss]", {});
+                &lt;/script&gt;
+                </em>
 </pre>
             </blockquote>
             The code above exposes a function called "invertColor" to all CjsSS.js evaluated Javascript code like this:
             <blockquote>
-<pre>
-/*
-    &lt;script&gt;
-        var sMainColor = "#cccccc";
-    &lt;/script&gt;
-*/
-div {
-    color: /*{{invertColor(sMainColor)}}*/;   //# invertColor returns '#333333'
-    text-transform: /*{{textTransform}}*/;    //# outputs 'capitalize'
-}                                             
-p {                                           
-    /*{{mixin(userConfig)}}*/                 //# outputs 'color: "green";'
-}                                             
-/*{{mixin(span, true)}}*/                     //# outputs 'span { background-color: "red"; color: "green"; }'
-</pre>
+                <pre>
+                <em class="comment">/*<em class="script">&lt;script&gt;
+                    var sMainColor = "#cccccc";
+                &lt;/script&gt;</em>*/</em>
+                DIV {
+                    color: <em class="comment">/*<em class="script var">invertColor(sMainColor)</em>*/</em>;   <em class="comment">//# invertColor returns '#333333'</em>
+                    text-transform: <em class="comment">/*<em class="script var">textTransform</em>*/</em>;    <em class="comment">//# outputs 'capitalize'</em>
+                }                                             
+                P {                                           
+                    <em class="comment">/*<em class="script var">mixin(userConfig)</em>*/</em>                 <em class="comment">//# outputs 'color: "green";'</em>
+                }                                             
+                <em class="comment">/*<em class="script var">mixin(span, true)</em>*/</em>                     <em class="comment">//# outputs 'span { background-color: "red"; color: "green"; }'</em>
+                </pre>
             </blockquote>
             
 
@@ -891,29 +1046,30 @@ p {
             <p></p>
             For example, if you wanted to override the <pre>expose</pre> functionality to make CjsSS.js available in a variable other than <pre>window.cjsss</pre>, you could do the following:
             <blockquote>
-<pre>
-&lt;script&gt;
-    var newVar = null;
+                <pre>
+                <em class="script">&lt;script&gt;
+                    var newVar = null;
 
-    window.cjsss = {
-        options: {
-            <strong>expose</strong>: <strong>true</strong>  //# exposes CjsSS.js under `newVar`
-        },
-        servicesFactory: function ($cjsss) {
-            return {
-                expose: function() {
-                    newVar = $cjsss;
-                }
-            };
-        }
-    };
-&lt;/script&gt;
-&lt;script type="text/javascript" src="<strong>cjsss.min.js</strong>"&gt;&lt;/script&gt; <!-- include CjsSS.js functionality -->
-</pre>
+                    window.cjsss = {
+                        options: {
+                            <strong>expose</strong>: <strong>true</strong>  <em class="comment">//# exposes CjsSS.js under `newVar`</em>
+                        },
+                        servicesFactory: function ($cjsss) {
+                            return {
+                                expose: function() {
+                                    newVar = $cjsss;
+                                }
+                            };
+                        }
+                    };
+                &lt;/script&gt;</em>
+                &lt;script type="text/javascript" src="<strong>cjsss.min.js</strong>"&gt;&lt;/script&gt; <!-- include CjsSS.js functionality -->
+                </pre>
             </blockquote>
 
 
         </div>
+
 
         <div class="examples">
             <h2>Examples</h2>
@@ -951,21 +1107,21 @@ p {
                 <li>
                     Embedded <pre>SCRIPT</pre>s are all evaluated in series at initilization prior to CSS modification, so the following will not work as expected:
                     <blockquote>
-<pre>
-<em class="comment">/*<em class="script">&lt;script&gt;
-    var mainColor = 'blue';
-&lt;/script&gt;</em>*/</em>
-DIV {
-    color: <em class="comment">/*<em class="script ng">mainColor</em>*/</em>; <em class="comment">//# expecting 'blue' but gets 'green'</em>
-}
+                        <pre>
+                        <em class="comment">/*<em class="script">&lt;script&gt;
+                            var mainColor = 'blue';
+                        &lt;/script&gt;</em>*/</em>
+                        DIV {
+                            color: <em class="comment">/*<em class="script var">mainColor</em>*/</em>; <em class="comment">//# expecting 'blue' but gets 'green'</em>
+                        }
 
-<em class="comment">/*<em class="script">&lt;script&gt;
-    mainColor = 'green';
-&lt;/script&gt;</em>*/</em>
-SPAN {
-    color: <em class="comment">/*<em class="script ng">mainColor</em>*/</em>; <em class="comment">//# expecting 'green'</em>
-}
-</pre>
+                        <em class="comment">/*<em class="script">&lt;script&gt;
+                            mainColor = 'green';
+                        &lt;/script&gt;</em>*/</em>
+                        SPAN {
+                            color: <em class="comment">/*<em class="script var">mainColor</em>*/</em>; <em class="comment">//# expecting 'green'</em>
+                        }
+                        </pre>
                     </blockquote>
                     At initilization <pre>mainColor</pre> will be set to "blue" then "green" prior to any CSS modification, so the <pre>color</pre> of both DIV and SPAN will be set to "green".
                 </li>
@@ -1042,7 +1198,6 @@ SPAN {
                 <input type="hidden" value="_s-xclick" name="cmd">
                 <input type="hidden" value="7HPTRFK8W53M4" name="hosted_button_id">
                 <button class="donate" name="submit">Developer Tip Jar</button>
-                <img border="0" width="1" height="1" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" alt="">
             </form>
 
             <p>
@@ -1060,6 +1215,19 @@ SPAN {
         </div>
 
         <script>
+            //# 
+            function processPre(a__tags) {
+                var i, a_sMatch, sHTML;
+
+                //# 
+                for (i = 0; i < a__tags.length; i++) {
+                    sHTML = a__tags[i].innerHTML;
+                    a_sMatch = sHTML.match(/^(\s+)/);
+                    a__tags[i].innerHTML = sHTML.replace(new RegExp((a_sMatch ? a_sMatch[1].replace("\n", "") : ""), "g"), "")
+                }
+            }
+            processPre(document.getElementsByTagName("blockquote"));
+
             cjsss.process();
             demo();
         </script>
