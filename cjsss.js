@@ -1,440 +1,314 @@
 /*
-ngCss v0.9i (kk) http://opensourcetaekwondo.com/ngcss/
-(c) 2014-2015 Nick Campbell ngcssdev@gmail.com
+CjsSS v0.9i (kk) http://opensourcetaekwondo.com/cjsss/
+(c) 2014-2015 Nick Campbell cjsssdev@gmail.com
 License: MIT
 Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color functionality present in LESS and Sass.
 */
-(function (angular, _window, _document, fnCjs3, fnEvalerFactory, fnLocalEvaler, fnUseStrictEvaler, fnSandboxEvalerFactory) {
-    //# ngCss functionality
+(function (jQuery, _window, _document, fnCjs3, fnEvalerFactory, fnLocalEvaler, fnUseStrictEvaler, fnSandboxEvalerFactory) {
+    //# CjsSS functionality
     var fnImplementation = function ($services) {
         'use strict';
 
-        //# Setup the required "global" vars
-        var $blankScope,
-            ngCss = "ngCss",
-            oModule = angular.module(ngCss, []),
-            $ngCss = {
+        var cjsss = "cjsss",
+            _window = window,
+            bExposed = false,
+            reScript = /<script.*?>([\s\S]*?)<\/script>/gi,
+            $cjsss = {
                 version: "v0.9i",
-                options: {
-                    script: "isolated",
-                    scope: "",
-                    async: true,
-                    live: false,
-                    callback: null
+                options: {                                                  //# STRING (CSS Selector); See: http://lesscss.org/#client-side-usage , http://stackoverflow.com/questions/7731702/is-it-possible-to-inline-less-stylesheets
+                    selector: "[" + cjsss + "],[data-" + cjsss + "],LINK[type='text/" + cjsss + "'],STYLE[type='text/" + cjsss + "']",
+                    optionScope: "json",                                    //# STRING (enum: json, global, local, object, sandbox); 
+                    scope: "isolated",                                      //# STRING (enum: global, local, object, sandbox); Javascript scope to evaluate code within.
+                    expose: true,                                           //# BOOLEAN; Set window.cjsss?
+                    async: true,                                            //# BOOLEAN; Process LINK tags asynchronously?
+                    rescope: false,
+                    d1: "[[", d2: "]]"                                      //# STRING; Delimiters denoting embedded Javascript variables (d1=start, d2=end).
                 },
                 data: {
                     cache: $services.cache,
-                    //inject: {},
+                    inject: {},
                     services: {}
                 },
-                services: $services
+                services: $services,
 
-                //# There is no need to expose any functionality on the top level of the $ngCss as this is accomplished via our .factory and .filter
+                //# We implement .process, .mixin and .inject with .apply below to ensure that these calls are always routed to the version under _window[cjsss].services (else a developer updating _window[cjsss].services.compile would also have to update _window[cjsss].compile)
+                process: function () {
+                    $services.js.process.apply(this, arguments);
+                },
+                mixin: function () {
+                    $services.mixin.apply(this, arguments);
+                },
+                inject: function () {
+                    $services.js.inject.apply(this, arguments);
+                }
             },
-            oDefaultOptions = $ngCss.options,                               //# Include these alias variables for improved code minimization
-            //oInjections = $ngCss.data.inject,
-            oCache = $services.cache
+            oDefaultOptions = $cjsss.options,                               //# Include these alias variables for improved code minimization
+            oInjections = $cjsss.data.inject
         ;
 
 
-        //# Set our .version and .extend the passed $services with our own Angular (ng) logic then .conf(igure) the $services
+        //# Set our .version and .extend the passed $services with our own Vanilla Javascript (js) logic then .conf(igure) the $services
         //#      NOTE: Setting up $services like this allows for any internal logic to be overridden as well as allows for all versions of CjsSS to coexist under a single definition (though some .conf logic would need to be used)
-        $services.version[ngCss] = $ngCss.version;
+        $services.version[cjsss] = $cjsss.version;
         $services.extend($services, {
-            ng: {
-                //# Stub out the .factory and .directive interfaces (which are populated below)
-                //factory: null,
-                //directive: null,
+            js: {
+                //# Autorun functionality
+                autorun: function () {
+                    //# If we have a .selector then we need to .compile them (using the default options of .compile)
+                    //#     NOTE: We pass in the .selector as the first argument of .compile to allow the developer to set it to an array of DOM objects if they so choose
+                    if (oDefaultOptions.selector) {
+                        $services.js.process(oDefaultOptions.selector);
+                    }
+                    //# Else we'll need to .expose ourselves (otherwise the developer won't have access our functionality)
+                    else {
+                        //oDefaultOptions.expose = true;
+                        $services.js.expose();
+                    }
+                }, //# autorun
 
-                //# Use the .mixin as our .filter
-                filter: $services.mixin,
+
+                //# DOM querying functionality (defaulting to jQuery if it's present on-page)
+                //#     NOTE: Include cjsss.polyfill.js or jQuery to support document.querySelectorAll on IE7 and below, see: http://quirksmode.org/dom/core/ , http://stackoverflow.com/questions/20362260/queryselectorall-polyfill-for-all-dom-nodes
+                dom: jQuery || function (sSelector) {
+                    //# Wrap the .querySelectorAll call in a try/catch to ensure older browsers don't throw errors on CSS3 selectors
+                    //#     NOTE: We are not returning a NodeList on error, but a full Array (which could be confusing for .services developers if they are not careful).
+                    try { return _document.querySelectorAll(sSelector); }
+                    catch (e) { return []; }
+                }, //# dom
+
+
+                //# Exposes our functionality under the _window
+                expose: function () {
+                    //# If we've not yet been bExposed
+                    if (!bExposed) {
+                        bExposed = true;
+
+                        //# .extend the current _window[cjsss] (if any) with the internal $cjsss, resetting both to the new .extend'ed object
+                        //#     NOTE: oDefaultOptions and $services are .extended in the procedural code below, so there is no need to so it again here
+                        $cjsss = _window[cjsss] = $services.extend(_window[cjsss], $cjsss);
+
+                        //# Ensure that $cjsss is also .inject'd into any IFRAMEs
+                        $services.js.inject(cjsss, $cjsss);
+                    }
+                }, //# expose
+
+
+                //# Injects the passed variant (exposed as the passed sVarName) to all non-JSON eval'uated code
+                inject: function (sVarName, variant) {
+                    var bReturnVal = $services.is.str(sVarName);
+
+                    //# If the passed sVarName .is.str(ing), set the passed variant into our oInjections
+                    if (bReturnVal) {
+                        oInjections[sVarName] = variant;
+                    }
+                    return bReturnVal;
+                }, //# inject
+
+                
+                //# Parses the passed sCSS based on the provided delimiters (under oDefaultOptions), returning a function that compiles (and optionally returns) the processed sCSS based on the then provided $element
+                //#     NOTE: This double-handling allows us to recompile the sCSS many times while only parsing it once
+                interpolate: function (oCacheEntry, oDefaultOptions) {
+                    var i, a_sToken,
+                        sCSS = oCacheEntry.css,
+                        a_sJS = [],
+                        a_sTokenized = sCSS
+                            .replace(reScript, "")  //# Remove the SCRIPTs (so we don't have extra delimiters that get wrongly a_sTokenized)
+                            .split(oDefaultOptions.d1)     //# Now .split the SCRIPT-less sCSS into a a_sTokenized array
+                    ;
+
+                    //# Traverse the a_sTokenized sCSS
+                    //#     NOTE: Since we are splitting on .d(elimiter)1, the first index of a_sTokenized represents the STYLE before the first /*{{var}}*/ so we don't process it and simply set it as the start of our sProcessedCSS
+                    for (i = 1; i < a_sTokenized.length; i++) {
+                        //# .split the a_sToken off the front of this entry
+                        //#     NOTE: Since `.split(delimiter, limit)` truncates to `limit` rather than stopping, we need to .shift and .join below
+                        a_sToken = a_sTokenized[i].split(oDefaultOptions.d2);
+
+                        //# .shift and .push the first index into our a_sJS eval stack and re-.join the reminder
+                        //#     NOTE: i: related index within a_sJS (as .push returns the new .length); s: trailing sCSS string
+                        a_sTokenized[i] = {
+                            i: a_sJS.push(a_sToken.shift()) - 1,
+                            s: a_sToken.join(oDefaultOptions.d2)
+                        };
+                    }
+
+                    //# Now that the sCSS is parsed, return the compile function
+                    return function /*compile*/(/*fnCallback*/) {
+                        var vResults, iOffset,
+                            a_sScripts = [],
+                            _element = oCacheEntry.dom,
+                            oParentCache = oCacheEntry.parent
+                        ;
+
+                        //# Callback function containing post-.evaler logic
+                        //#     NOTE: We need this logic in a callback to support promises returned from .evaler
+                        function callback(oResults) {
+                            //# Set the first index of a_sTokenized into sProcessedCSS then traverse the rest of the a_sTokenized .css, rebuilding it as we go
+                            //#     NOTE: Since we are splitting on .d(elimiter)1, the first index of a_sTokenized represents the STYLE before the first /*{{var}}*/ so we don't process it and simply set it as the start of our sProcessedCSS
+                            var sProcessedCSS = a_sTokenized[0];
+                            for (i = 1; i < a_sTokenized.length; i++) {
+                                //# Pull the result of the eval from the .results at the recorded .i(ndex) and append the trailing .css .s(tring)
+                                sProcessedCSS += oResults.results[a_sTokenized[i].i + iOffset] + a_sTokenized[i].s;
+                            }
+
+                            //# If we are supposed to .setAttribute, then set the sProcessedCSS into it
+                            if (oCacheEntry.tag === "*") {
+                                _element.setAttribute("style", sProcessedCSS);
+                            }
+                                //# Else we are updating a STYLE tag
+                            else {
+                                //# If this is IE8 or below we'll have a .styleSheet (and .styleSheet.cssText) to set .css into, else we can use .innerHTML, see: http://stackoverflow.com/questions/9250386/trying-to-add-style-tag-using-javascript-innerhtml-in-ie8 , http://www.quirksmode.org/dom/html/#t00 , http://stackoverflow.com/questions/5618742/ie-8-and-7-bug-when-dynamically-adding-a-stylesheet , http://jonathonhill.net/2011-10-12/ie-innerhtml-style-bug/
+                                //#     TODO: Test in IE8-
+                                if (_element.styleSheet) {
+                                    _element.styleSheet.cssText = sProcessedCSS;
+                                } else {
+                                    _element.innerHTML = sProcessedCSS;
+                                }
+                            }
+
+                            //# If we had .errors .evaler'ing the a_sJS, .warn the caller
+                            if (oResults.errors.length > 0) {
+                                $services.warn("Errors occurred processing the Javascript for: ", _element, oResults.errors);
+                            }
+                            
+                            //# 
+                            //fnCallback(sProcessedCSS, oResults);
+                            return sProcessedCSS;
+                        } //# callback
+
+
+                        //# If we haven't .run the .scripts yet (or we are to always .run because they fall out of scope)
+                        //#     NOTE: If we need to .run once, .run is set to 1 then decremented to 0 after the first .run. If we are supposed to .run every time it is set to -1 and decremented every time below 0
+                        if (oParentCache && oParentCache.scripts && oParentCache.evaler.run !== 0) {
+                            //# Decrement .run and .concat the .scripts into our a_sScripts
+                            oParentCache.evaler.run--;
+                            a_sScripts = a_sScripts.concat(oParentCache.scripts);
+                        }
+
+                        //# If we have a .parent and we need to run our .scripts
+                        //#     NOTE: If we need to .run once, .run is set to 1 then decremented to 0 after the first .run. If we are supposed to .run every time it is set to -1 and decremented every time below 0
+                        if (oCacheEntry && oCacheEntry.scripts && oCacheEntry.evaler.run !== 0) {
+                            //# Decrement .run and .concat the .scripts into our a_sScripts
+                            oCacheEntry.evaler.run--;
+                            a_sScripts = a_sScripts.concat(oCacheEntry.scripts);
+                        }
+
+                        //# Determine the iOffset then .concat the parsed a_sJS into our a_sScripts
+                        iOffset = a_sScripts.length;
+                        a_sScripts = a_sScripts.concat(a_sJS);
+
+                        //# Now that we have a fully populated our a_sScripts eval stack, process it while passing in the (globally defined) oInjections
+                        vResults = oCacheEntry.evaler.$eval(a_sScripts, oInjections, true);
+
+                        //# If the returned vResults is a promise then pass it our callback, else pass the vResults to our callback ourselves
+                        if ($services.is.fn(vResults.then)) {
+                            vResults.then(callback);
+                        } else {
+                            return callback(vResults);
+                        }
+                    };
+                }, //# interpolate
+
+
+                //# Processes the CSS within the passed vElements using the provided oProcessOptions (overriding any previously set)
+                process: function (vElements, oProcessOptions) {
+                    var i,
+                        a__ElementsToCompile = [],
+                        a__CompiledElements = [],
+                        oPrelimOptions = $services.extend({}, oDefaultOptions, oProcessOptions)
+                    ;
+
+                    //# If a truthy vElements was passed
+                    if (vElements) {
+                        //# If the passed vElements is CSS Selector(-ish), select the a_$elements now
+                        if ($services.is.str(vElements)) {
+                            a__ElementsToCompile = $services.js.dom(vElements);
+                        }
+                        //# Else ensure a_$elements is an array-like object
+                        //#     NOTE: Since a NodeList is not a native Javascript object, .hasOwnProperty doesn't work
+                        else {
+                            a__ElementsToCompile = (vElements[0] && vElements.length ? vElements : [vElements]);
+                        }
+                    }
+                    //# Else if we have a .selector, reset the a_$elements accordingly
+                    else if ($services.is.str(oPrelimOptions.selector)) {
+                        a__ElementsToCompile = $services.js.dom(oPrelimOptions.selector);
+                    }
+
+                    //# If we have been told to .expose ourselves, so do now (before we run any code below)
+                    if (oPrelimOptions.expose) {
+                        $services.js.expose();
+                    }
+
+                    //# Traverse the a__ElementsToCompile (if any)
+                    for (i = 0; i < a__ElementsToCompile.length; i++) {
+                        a__CompiledElements = a__CompiledElements.concat(
+                            $services.compile.element(
+                                a__ElementsToCompile[i],
+                                oPrelimOptions,
+                                function (oCacheEntry /*, a__Elements*/) {
+                                    //# Set the $interpolate function into our oCacheEntry's .interpolate'ion function (which is returned by .js.interpolate)
+                                    oCacheEntry.$interpolate = $services.js.interpolate(oCacheEntry, oPrelimOptions);
+                                    //oCacheEntry.callback = oPrelimOptions.callback;
+                                    
+                                    //# Get the oCompiledOptions, collecting them in the passed fnCallback (as the .compile.element within .compile.options may be .async)
+                                    $services.compile.options(
+                                        oCacheEntry,
+                                        oDefaultOptions,
+                                        function (oCompiledOptions) {
+                                            //# Local implementation of updateCSS with scope access to our oCacheEntry
+                                            function updateCSS() {
+                                                //# .runScripts then .updateCSS
+                                                //$services.runScripts(oCacheEntry, oCompiledOptions, oInjections);
+                                                $services.updateCSS(oCacheEntry);
+                                            }
+                                            updateCSS();
+                                        }
+                                    );
+                                }
+                                //, false
+                            )
+                        );
+                    }
+
+                    //# Return the a__CompiledElements to the caller
+                    return a__CompiledElements;
+                }, //# process
 
 
                 //# Configures the base $services object to work with the current implementation
                 conf: function () {
-                    var oConfig = $services.config; //# code-golf
-
-                    //# Transforms the passed sCamelCase to dash-case (removing the erroneous leading dash if it's there)
-                    function c2d(sCamelCase) {
-                        var sDashCase = sCamelCase.replace(/([A-Z])/g, '-$1').toLowerCase();
-                        return (sDashCase.indexOf("-") === 0 ? sDashCase.substr(1) : sDashCase);
-                    } //# c2d
-
-
-                    //# Set our $services.config options (so it can do error reporting and attribute processing correctly)
-                    //#     NOTE: We cannot simply pass in $blankScope.$eval as calling .$eval indirectly seems to detach it from it's $blankScope!? (not that it matters in this case)
-                    oConfig.attr = c2d(ngCss);
-                    oConfig.scopeAlias = "script";
-                    oConfig.expandAttr = "{ $scopeAlias: '$attr', scope: '$attr' }";
-
-                    //# Rewire the $services.config.getEvaler functionality
-                    oConfig.getEvaler = function (vScope) {
-                        //# If the vScope maps to ngCss, return the evaler function, else return null
-                        return (vScope === ngCss ?
-                            function (sCode) {
-                                //# Ensure the $blankScope exists, then return the .$eval'd sCode
-                                $blankScope = $blankScope || $services.ng.factory.scope.$new({ isolate: true });
-                                return $blankScope.$eval(sCode);
-                            } :
-                            null
-                        );
-                    };
+                    //# Set our .attr and .scopeAlias into the $services.config (so it can do error reporting and attribute processing correctly)
+                    $services.config.attr = cjsss;
+                    //$services.config.scopeAlias = "scope";
+                    //$services.config.expandAttr = '{ "$scopeAlias": "$attr" }';
 
                     //# Rewire the $services.scope.hook functionality
-                    $services.scope.hook = function (oData) {
-                        //# Reset the value of .go based on if .s(cope) is === false
-                        //#     NOTE: This implements the boolean value of .script for ngCss that isn't present in the base implementation
-                        oData.go = (oData.s !== false);
-                        return oData;
-                    };
+                    //$services.scope.hook = function (oData) { return oData; }
 
                     //# Before importing any external functionality, copy the original $service function references into .data.services
-                    //#     NOTE: angular.extend does not do a deep copy, while .merge does but is v1.4+ - http://stackoverflow.com/questions/17242927/deep-merge-objects-with-angularjs, https://docs.angularjs.org/api/ng/function/angular.extend , https://docs.angularjs.org/api/ng/function/angular.merge
-                    $ngCss.data.services = $services.extend({}, $services);
+                    $cjsss.data.services = $services.extend({}, $services);
+
+                    //# If the developer has already setup a _window[cjsss] object
+                    //#     NOTE: These first calls to .is.obj, .is.fn and .extend are the only non-overridable pieces of code in CjsSS!
+                    if ($services.is.obj(_window[cjsss])) {
+                        //# If the developer has provided a servicesFactory, .extend its results over our own $services
+                        if ($services.is.fn(_window[cjsss].servicesFactory)) {
+                            $services.extend($services, _window[cjsss].servicesFactory($cjsss));
+                        }
+
+                        //# .extend any developer .options over our oDefaultOptions
+                        $services.extend(oDefaultOptions, _window[cjsss].options);
+                    }
+
+                    //# .inject our .mixin then .autorun
+                    $services.js.inject("mixin", $services.mixin);
+                    $services.js.autorun();
                 } //# conf
-            }
+
+            }//# js
         }); //# extend($services...
-        $services.ng.conf();
+        $services.js.conf();
 
-
-        //# Transforms the passed object into an inline CSS string when bSelector is falsey (e.g. `color: red;`) or into CSS entry when bSelector is truthy (e.g. `selector { color: red; }`), where object._selector or vSelector is used for the selector
-        oModule.filter('css', function () {
-            return $services.ng.filter;
-        }); //# oModule.filter('css'...
-
-
-        //# ngCss factory to house public helper methods
-        oModule.factory(ngCss, ["$rootScope", function ($rootScope) {
-            //# Resolves the passed vElement into a jQuery/jqLite version (if any) 
-            function resolveElement(vElement) {
-                //# If vElement is a DOM ID, reset it to its DOM reference
-                if ($services.is.str(vElement) && vElement.substr(0, 1) === "#") {
-                    vElement = _document.getElementById(vElement.substr(1));
-                }
-
-                //# Collect the jQuery/jqLite version of vElement (if any)
-                return angular.element(vElement);
-            }
-            
-
-            //# Determines if the passed oObject is an Angular $scope
-            function isScope(oObject) {
-                return ($services.is.obj(oObject) && oObject.$root === $rootScope);
-            }
-
-
-            //# Creates a new Angular $scope, optionally oMerge'ing in the passed object
-            function newScope(oOptions) {
-                //# .extend the passed oOptions with the default values (while ensuring oOptions is an object) then return the .$new scope
-                oOptions = $services.extend({
-                    //merge: undefined,
-                    isolate: false,
-                    parent: $rootScope
-                }, oOptions);
-                return $services.extend($rootScope.$new(oOptions.isolate === true, oOptions.parent), oOptions.merge);
-            }
-
-
-            //# Shortcut method to properly collect the .isolateScope (or $scope) for the vElement
-            function getScope(vElement, bForce) {
-                var $scope, bIsIsolate,
-                    $element = resolveElement(vElement)
-                ;
-
-                //# .warn on any errors we encounter collecting the $element (as without a jQuery/jqLite $element we can't get its $scope anyway)
-                //#     NOTE: This allows the caller to pass anything within vElement without getting an error
-                try {
-                    //# If we were able to collect the $element
-                    if ($element && $element[0]) {
-                        //# If the $element is in the oCache, attempt to collect the .foreignScope from there
-                        //#     NOTE: This is done as we may have a ngCss .foreignScope in effect for this $element that differs from both .isolateScope and .scope
-                        if (oCache[$element[0].id]) {
-                            $scope = oCache[$element[0].id].foreignScope;
-                        }
-
-                        //# If we didn't collect a valid $scope from the oCache
-                        if (!isScope($scope)) {
-                            //# Set $scope and bIsIsolate via Angular's functions (resetting $scope if no .isolateScope exists)
-                            //#     NOTE: bIsIsolate utilizes all 3 boolean states; true == isolate, false == parent-scope and undefined == .foreignScope (as we are not certian if it's the $element's isolate or parent-scope)
-                            //#     TODO: Allow return of bIsIsolate
-                            $scope = $element.isolateScope();
-                            bIsIsolate = isScope($scope);
-                            if (!bIsIsolate) { $scope = $element.scope(); }
-                        }
-                    }
-                } catch (e) {
-                    $services.warn("Error collecting $scope for", vElement, e);
-                }
-
-                //# If we didn't locate a valid $scope but we are supposed to bForce a $scope, return a .$new one, else we're good to return whatever $scope we found (if any)
-                return (!isScope($scope) && bForce === true ? $rootScope.$new(true) : $scope);
-            } //# scope.get
-
-
-            //# Populate the .$rootScope and the .factory structure under our $services, then return the .factory
-            $services.ng.$rootScope = $rootScope;
-            $services.ng.factory = {
-                //# Expose our $ngCss object to allow for overloading of our internal functionality
-                $ngCss: $ngCss,
-
-                //# Extends our ngCss oDefaultOptions options with the passed oOptions while returning a copy of the oDefaultOptions
-                defaults: function (oOptions) {
-                    oDefaultOptions = $services.extend(oDefaultOptions, oOptions);
-                    return $services.extend({}, oDefaultOptions);
-                }, //# defaults
-
-
-                //# Returns an unused sPrefix'ed HTML ID
-                //#     NOTE: sPrefix must begin with /A-Za-z/ to be HTML-compliant
-                newId: function (sPrefix) {
-                    //# Use the .newId functionality within $services, passing in either the passed sPrefix or ngCss if none was passed
-                    return $services.newId(sPrefix || ngCss);
-                }, //# newId
-
-
-                //# Bundle of Angular $scope functionality
-                scope: {
-                    //# Creates a new Angular $scope
-                    $new: newScope,
-                    
-                    //# Shortcut method to properly collect the .isolateScope (or $scope) for the vElement
-                    get: getScope,
-                    
-                    //# Determines if the passed oObject is an Angular $scope
-                    is: isScope,
-                    
-                    //# Ensures that the passed oObject is a $scope, returning a new isolated $scope with the passed oObject .extend'ed in if it is not
-                    as: function (oObject, bIsolate) {
-                        return (isScope(oObject) ? oObject : newScope({
-                            isolate: bIsolate === true,
-                            //parent: $rootScope,
-                            merge: oObject
-                        }));
-                    },
-                    
-                    //# Returns the 
-                    outer: function (vElement) {
-                        var $element = resolveElement(vElement),
-                            $returnVal = getScope(
-                                ($element && $services.is.fn($element.parent) ? $element.parent() : null)
-                                /*, false*/
-                            )
-                        ;
-                        return ($returnVal !== $rootScope ? $returnVal : undefined);
-                    }
-                }, //# scope
-
-                //# Shortcut method to .$broadcast the custom event
-                updateCss: function () {
-                    $rootScope.$broadcast('updateCss');
-                }, //# updateCss
-
-
-                //# Shortcut method to listen for the custom .$broadcast event
-                //#     NOTE: fnDoUpdateCSS !== .updateCSS as fnDoUpdateCSS must be parameterless
-                addCssListener: function (fnDoUpdateCSS) {
-                    $rootScope.$on('updateCss', fnDoUpdateCSS);
-                } //# addCssListener
-            };
-            return $services.ng.factory;
-        }]); //# oModule.factory(ngCss...
-
-
-        //# Processes the referenced CSS (either inline CSS in STYLE tags or external CSS in LINK tags) for Angular {{variables}}, optionally allowing for live binding and inline script execution.
-        //#
-        //#     Options provided via the ng-css attribute (e.g. `<link ng-css="{ script: false, live: false, commented: true }" ... />`):
-        //#         options.async (default: true)           Specifies if the LINK tags are to be fetched asynchronously or not
-        //#         options.scope (default: false)          Specifies if the outer $scope is to be used by the directive. A 'false' value for this option results in an isolate scope for the directive and logically requires `options.script` to be enabled (else no variables will be settable).
-        //#         options.script (default: false)         Specifies if <script> tags embedded within the CSS are to be executed. "local" specifies that the eval'uations will be done within an isolated closure with local scope, any other truthy value specifies that the eval'uations will be done within an isolated sandboxed enviroment with access only given to the $scope.
-        //#         options.live (default: false)           Specifies if changes made within $scope are to be automatically reflected within the CSS.
-        oModule.directive(ngCss, ['$interpolate', '$timeout', ngCss, function ($interpolate, $timeout, $ngCssFactory) {
-            //# Implements the .link call
-            function doLink(oCacheEntry, $scope, $evalScope) {
-                //# Now that we have an $evalScope, reset the .ovaler
-                //#     NOTE: We cannot simply pass in $evalScope.$eval as calling .$eval indirectly seems to detach it from its $evalScope!?
-                oCacheEntry.ovaler = function (sCode) {
-                    return $evalScope.$eval(sCode);
-                };
-
-                //# Get the oCompiledOptions, collecting them in the passed fnCallback (as the .compile.element within .compile.options may be .async)
-                $services.compile.options(
-                    oCacheEntry,
-                    oDefaultOptions,
-                    function (oCompiledOptions) {
-                        //# Finalize the processing of the oCompiledOptions by running the .is.fn in .scope (if any)
-                        //#     NOTE: There is no need to have a hook for .compile.options to do this post-processing as a hook would be called directly prior to this fnCallback, so we might as well do it at the head of the fnCallback
-                        var sScope = ($services.is.fn(oCompiledOptions.scope) ? $services.fn.option(oCompiledOptions.scope, oCacheEntry) : oCompiledOptions.scope),
-                            bFinailize = true
-                        ;
-
-                        //# If the caller passed is a string
-                        if ($services.is.str(sScope)) {
-                            //# If this is an #ID specification, .scope.get (NOT bForce'ing a new $scope if we can't find one on the referenced #ID so we get the .warn below)
-                            if (sScope.substr(0, 1) === "#") {
-                                bFinailize = false;
-
-                                //# Wait for the other directives to be setup before running our logic
-                                $timeout(function () {
-                                    $scope = $ngCssFactory.scope.get(sScope /*, false*/);
-                                    oCacheEntry.foreignScope = $scope;
-                                    finalizeLink(oCacheEntry, $scope, oCompiledOptions);
-                                });
-                            }
-                            //# Else if the caller didn't request the parent scope, create a .$new isolate $scope now
-                            else if (sScope !== "parent") {
-                                $scope = $ngCssFactory.scope.$new({ isolate: true });
-                                oCacheEntry.foreignScope = $scope;
-                            }
-                            //# Else reset the oCacheEntry's .foreignScope
-                            //#     TODO: Is this correct?
-                            else {
-                                oCacheEntry.foreignScope = null;
-                            }
-                        }
-                        //# Else if we have a oParentCacheEntry
-                        //#     NOTE: `evaler.parent` refers to the Javascript scope/heritage. The code below is no longer necessary as the user should address the parent Angular scope directly via #ParentID.
-                        //else if (oParentCacheEntry) {
-                        //    //# Collect the parent $scope (if any)
-                        //    //#     NOTE: .scope.get will return any $scope in effect for the oParentCacheEntry, but since we have a falsey bForce, it will come back as undefined if there is no $scope (leaving our isolate $scope in-place)
-                        //    oResults = $ngCssFactory.scope.get(oParentCacheEntry.dom /*, false*/);
-
-                        //    //# If a parent $scope was found
-                        //    if (oResults) {
-                        //        //# Reset our $scope and oCache it under .foreignScope (for use in subsiquent .scope.get calls)
-                        //        oCacheEntry.foreignScope = $scope = oResults;
-                        //    }
-                        //}
-
-                        //# If we haven't bFinailize'd above, do so now
-                        if (bFinailize) {
-                            finalizeLink(oCacheEntry, $scope, oCompiledOptions);
-                        }
-                    }
-                );
-            } //# doLink
-
-
-            //# Finalizes a .link call
-            function finalizeLink(oCacheEntry, $scope, oCompiledOptions) {
-                //# Local implementation of updateCSS with scope access to our oCacheEntry
-                function updateCSS() {
-                    //# .runScripts then .updateCSS
-                    $services.runScripts(oCacheEntry, oCompiledOptions, { $scope: $scope, scope: $scope });
-                    $services.updateCSS(oCacheEntry);
-                }
-
-
-                //# If the $scope got squashed, .warn the user
-                if (!$ngCssFactory.scope.is($scope)) {
-                    $services.warn("Error collecting $scope for", oCacheEntry.dom, oCompiledOptions.scope);
-                }
-                //# Else we have a valid $scope
-                else {
-                    //# Populate the oCacheEntry with the implementation-specific .ng
-                    oCacheEntry.ng = {
-                        //inject: { $scope: $scope, scope: $scope },
-                        $i: $interpolate(oCacheEntry.css),
-                        $s: $scope
-                    };
-
-                    //# Set the $interpolate function into our oCacheEntry
-                    oCacheEntry.$interpolate = function () {
-                        return oCacheEntry.ng.$i(oCacheEntry.ng.$s);
-                    };
-                    oCacheEntry.callback = oCompiledOptions.callback;
-                    
-                    //# .updateCSS
-                    updateCSS();
-
-                    //# If we are supposed to live-bind, .$watch for any changes in the $scope (calling our .updateCSS when they occur)
-                    if (oCompiledOptions.live) {
-                        $scope.$watch(updateCSS);
-                    }
-                    //# Else we are not .live, so setup the event listener
-                    else {
-                        $ngCssFactory.addCssListener(updateCSS);
-                    }
-                }
-            } //# finalizeLink
-
-            
-            //# Reset the delimiters and .optionScope in our oDefaultOptions before sending them into .compile
-            //#     NOTE: We hard-code the .optionScope below as attributes are always parsed by Angular in the Angular world (else we wouldn't have access to the $scope vars)
-            //#     NOTE: This can be done once as this .directive exists at runtime only under a single angular instance
-            oDefaultOptions.d1 = $interpolate.startSymbol();
-            oDefaultOptions.d2 = $interpolate.endSymbol();
-            oDefaultOptions.optionScope = ngCss;
-
-            //# Populate the .$interpolate, .$timeout and the .directive structure under our $services, then return the .directive
-            $services.ng.$interpolate = $interpolate;
-            $services.ng.$timeout = $timeout;
-            $services.ng.directive = {
-                //# .restrict the directive to attribute only (e.g.: <style ng-css>...</style> or <link ng-css ... />)
-                restrict: "A",
-
-                //# TODO: move logic from template to here?
-                //compile: function ($element, $attrs) {
-                //    if ($attrs[ngCss].substr(0, 1) !== "{") {
-                //        //$attrs[ngCss] = "";
-                //        delete $attrs[ngCss];
-                //        delete $attrs.$attr[ngCss];
-                //    }
-                //
-                //    //# Return the .link function
-                //    return function (/*$scope, $element, $attrs, ngControllers*/) {};
-                //},
-
-                //# Compiles the oCache entry for each ng-css $element while scooping out the CSS before Angular processes it (so we avoid issues with double processing of {{vars}})
-                template: function ($element, $attrs) {
-                    //# If this is a shorthand definition, clear the ngCss attribute from $attrs
-                    //#     NOTE: This is necessary due to the ability to define `ng-css="#domId"` shorthand rather than `ng-css="{ scope: '#domId' }"` which throws a `lexerr` due to the ngCss attribute not being an object
-                    //#     NOTE: Angular parses out the attributes prior to calling .template (duh!) but passes the internally used $attrs, so we are able to "erase" attribute values by deleting them within $attrs
-                    //#     TODO: May want to delete the ngCss entries from $attrs to fully remove all Angular hooks? May need to do in compile?
-                    if ($attrs[ngCss].substr(0, 1) !== "{") {
-                        //$attrs[ngCss] = "";
-                        delete $attrs[ngCss];
-                        delete $attrs.$attr[ngCss];
-                    }
-
-                    //# .compile the DOM version of the $element, post-processing any non-LINK/STYLE tags (as this is the initial .compile)
-                    $services.compile.element($element[0], oDefaultOptions,
-                        //# fnCallback: implementation-specific .compile postprocessing logic
-                        function (oCacheEntry /*, a__Elements*/) {
-                            //# If this $element isn't a LINK/STYLE tag
-                            if (oCacheEntry.tag === "*") {
-                                //# Cache the ngCss attribute then remove it (to avoid $isolateScope issues with any other ng-* attributes)
-                                //#     NOTE: Removing the attribute is a sneaky trick as we are removing our own $isolateScope directive before Angular has fully $compile'd it
-                                oCacheEntry[ngCss] = $element.attr(oCacheEntry.options.attr);
-                                $element.removeAttr(oCacheEntry.options.attr);
-                            }
-                        },
-                        true
-                    );
-                }, //# template
-
-
-                //# Define the link function to wire-up our functionality at data-link
-                link: function ($scope, $element /*, $attrs, $controllers*/) {
-                    var sID = $element[0].id,                                       //# We know the $element has an .id as it was .compiled in .template above
-                        oCacheEntry = oCache[sID],
-                        $evalScope = $ngCssFactory.scope.outer($element) || $scope  //# Default $evalScope to our .scope.outer (if any, as we may or may not be using our isolate $scope)
-                    ;
-                    
-                    //# If we successfully collected the oCacheEntry, call doLink now
-                    if (oCacheEntry) {
-                        doLink(oCacheEntry, $scope, $evalScope);
-                    }
-                    //# Else oCacheEntry doesn't exist yet (which means it's a LINK tag that's still being processed), so wire in doLink as a .c(all)o(n)c(omplete)
-                    else {
-                        $services.coc[sID] = function () {
-                            $services.coc[sID] = null;
-                            doLink(oCache[sID], $scope, $evalScope);
-                        };
-                    }
-                } //# link
-            };
-            return $services.ng.directive;
-        }]); //# oModule.directive(ngCss...
     }; //# fnImplementation
 
 
@@ -444,8 +318,8 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
     //####################################################################################################
     fnCjs3(_window, _document, fnImplementation, fnEvalerFactory, fnLocalEvaler, fnUseStrictEvaler, fnSandboxEvalerFactory);
 })(
-    //# Include any external libraries
-    angular,
+    //# Include any external libraries, passing in as window.jQuery to allow it to be optional
+    window.jQuery,
 
     //# Pass in the standard objects (code-golf)
     window,
@@ -534,7 +408,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                         if (oCache[sID]) {
                             $baseServices.compile.setEvaler(oCache[sID], oPrelimOptions, fnCallback, a__Elements /*, false*/);
                         }
-                        //# Else we need to build the oCache entry for this _element
+                            //# Else we need to build the oCache entry for this _element
                         else {
                             //# Determine the .tagName and process accordingly
                             switch (_element.tagName.toLowerCase()) {
@@ -696,7 +570,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                                     $baseServices.warn("Invalid scope `" + sScope + "` for", _element, sScope);
                                 }
                             }
-                            //# Else if the .evaler hasn't been set yet, if the sScope has changed or if the .c(ontext) has changed
+                                //# Else if the .evaler hasn't been set yet, if the sScope has changed or if the .c(ontext) has changed
                             else if (!oCacheEntry.evaler || oCacheEntry.evaler.scope !== sScope || oCacheEntry.evaler.context !== oScope.c) {
                                 //# If this is an non-related sScope
                                 if (sScope.substr(0, 1) !== "#") {
@@ -755,7 +629,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                                     }
                                 }
                             }
-                            //# Else we have an up-to-date .evaler so flip bSetEvaler as there is no need to reset it below
+                                //# Else we have an up-to-date .evaler so flip bSetEvaler as there is no need to reset it below
                             else {
                                 bSetEvaler = true;
                             }
@@ -1846,3 +1720,25 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
     }
     //# </EvalerJS>
 );
+
+
+//# Stub for $.CjsSS
+//(function ($) {
+//    //# jQuery extension to enable Javascript within CSS
+//    $.fn.extend({
+//        cjsss: function (oOptions) {
+//            return this.each(function () {
+//                // Do something to each element here.
+//            });
+//        }
+//    }); //# $.fn.cjsss
+
+//    //# Create the jQuery $.cjsss interface to update the default options
+//    $.extend({
+//        cjsss: {
+//            options: {},
+//            process: {},
+//            services: {}
+//        }
+//    });
+//})(jQuery);
