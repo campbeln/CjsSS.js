@@ -361,7 +361,7 @@
             em.script {
                 color: /*[[oColors.red]]*/;
             }
-            VAR:
+            VAR,
             .var-end:after,
             .var:after {
                 content: "\5D\5D";
@@ -489,7 +489,7 @@
         <script type="text/javascript" src="js/cjsss.js"></script>
     </head>    
     <body>
-        <div class="splash">
+        <div class="splash" style="background-color: /*[[oColors.brown]]*/; color: black;">
             <a class="download" href="https://github.com/campbeln/cjsss">Download From GitHub</a>
 
             <h1>
@@ -499,9 +499,9 @@
 
             <br/><img src="img/cj.png" id="cj" />
             <ul id="demo"><!-- #554233 #d4c668 #c695cf  /*[[oColors.brown]]*/  -->
-                <li style="background-color: /*[[oColors.brown]]*/;" cjsss="#myCss" onclick="mutateCSS(this)"></li>
-                <li style="background-color: /*[[oColors.yellow]]*/;" cjsss="#myCss" onclick="mutateCSS(this)" class="active"></li>
-                <li style="background-color: /*[[oColors.pink]]*/;" cjsss="#myCss" onclick="mutateCSS(this)"></li>
+                <li cjsss-style="background-color: /*[[oColors.brown]]*/;" cjsss="#myCss" onclick="mutateCSS(this)"></li>
+                <li cjsss-style="background-color: /*[[oColors.yellow]]*/;" cjsss="#myCss" onclick="mutateCSS(this)" class="active"></li>
+                <li cjsss-style="background-color: /*[[oColors.pink]]*/;" cjsss="#myCss" onclick="mutateCSS(this)"></li>
             </ul>
 
             <span class="tagline">Bind Javascript Variables & Functions In CSS</span>
@@ -835,18 +835,22 @@
             When applying ngCss to a <pre>style</pre> attribute, you have two options when setting the value of <pre>cjsss</pre>'s in-line options:
             <ul>
                 <li>
-                    <pre><pre>&lt;div style="color: <span class='var'>color</span>;" <strong>cjsss="#myCss"</strong>&gt;...&lt;/div&gt;</pre></pre>
+                    <pre><pre>&lt;div <strong>cjsss-</strong>style="color: <span class='var'>color</span>;" style="font-style: italic;" <strong>cjsss="#myCss"</strong>&gt;...&lt;/div&gt;</pre></pre>
                     <br/>This will import the <a href="https://docs.angularjs.org/guide/scope">Angular <pre>$scope</pre></a> and option values from the referenced <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/id">HTML Element</a> with the ID <i>myCss</i> (e.g. "<i>#myCss</i>" overrides <pre>options.scope</pre>).
                     This element <i>should</i> be a <pre>cjsss</pre> attributed <pre>LINK</pre> or <pre>STYLE</pre> tag, but any Angular element's <pre>$scope</pre> can be imported.
                 </li>
                 <li>
-                    <pre><pre>&lt;div style="color: <span class='var'>color</span>;" <strong>cjsss="{ scope: '#myCss', live: true }"</strong>&gt;...&lt;/div&gt;</pre></pre>
+                    <pre><pre>&lt;div <strong>cjsss-</strong>style="color: <span class='var'>color</span>;" style="font-style: italic;" <strong>cjsss='{ "scope": "#myCss", "live": "true" }'</strong>&gt;...&lt;/div&gt;</pre></pre>
                     <br/>This will also import the <a href="https://docs.angularjs.org/guide/scope">Angular <pre>$scope</pre></a>/option values from ID <i>myCss</i> while overriding the value of <pre>options.live</pre> to <pre>true</pre>.
                     This is useful when you want to use a <pre class="var">Variable</pre> within your <pre>style</pre> attribute but do not require it to be live-bound like its source (as used in 2 of the 3 <a href="#profiles">color profile selection boxes</a> above to demonstrate the concept).
                 </li>
             </ul>
             Only the <pre>style</pre> attribute is effected by CjsSS.js in this context using a non-isolate <pre>$scope</pre> (even when the referenced element is!).
             This is accomplished by a bit of pre- and post-<pre>$compile</pre> slight-of-hand between the directive's <pre>template</pre> and <pre>link</pre> functions and custom linking code via a <pre>$watch</pre> (<pre>live: true</pre>) or <pre>$on</pre> (<pre>live: false</pre>).
+            <div class="note">
+                Due to <a href="http://stackoverflow.com/questions/23610625/angular-expression-inside-style-attribute-dont-work-in-ie">IE's behavior</a> of <a href="http://stackoverflow.com/questions/15676445/invalid-css-property-gets-removed-in-inline-style">removing invalid CSS settings </a> from <pre>STYLE</pre> attributes at parse (which in turn, removes them from the DOM) it is necessary to specify CjsSS.js styles in a <pre>cjsss-style</pre> (or HTML5-compliant <pre>data-cjsss-style</pre>) attribute.
+                The <pre>cjsss-style</pre> (or HTML5-compliant <pre>data-cjsss-style</pre>) attribute is concatnated with the additionally-defined <pre>STYLE</pre> attribute if it is present.
+            </div>
 
 
             <a name="override"></a>
