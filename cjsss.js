@@ -1,5 +1,5 @@
 /*
-CjsSS v0.9i (kk) http://opensourcetaekwondo.com/cjsss/
+CjsSS v0.9j (kk) http://opensourcetaekwondo.com/cjsss/
 (c) 2014-2015 Nick Campbell cjsssdev@gmail.com
 License: MIT
 Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color functionality present in LESS and Sass.
@@ -14,7 +14,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             bExposed = false,
             reScript = /<script.*?>([\s\S]*?)<\/script>/gi,
             $cjsss = {
-                version: "v0.9i",
+                version: "v0.9j",
                 options: {                                                  //# STRING (CSS Selector); See: http://lesscss.org/#client-side-usage , http://stackoverflow.com/questions/7731702/is-it-possible-to-inline-less-stylesheets
                     selector: "[" + cjsss + "],[data-" + cjsss + "],LINK[type='text/" + cjsss + "'],STYLE[type='text/" + cjsss + "']",
                     optionScope: "json",                                    //# STRING (enum: json, global, local, object, sandbox); 
@@ -254,10 +254,11 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                                     $services.compile.options(
                                         oCacheEntry,
                                         oDefaultOptions,
-                                        function (oCompiledOptions) {
+                                        function (/*oCompiledOptions*/) {
                                             //# Local implementation of updateCSS with scope access to our oCacheEntry
                                             function updateCSS() {
                                                 //# .runScripts then .updateCSS
+                                                //#     TODO: Determine why next line was commented out
                                                 //$services.runScripts(oCacheEntry, oCompiledOptions, oInjections);
                                                 $services.updateCSS(oCacheEntry);
                                             }
@@ -340,7 +341,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
             $baseServices = {
                 version: {
                     //evaler: '',
-                    baseServices: 'v0.9i'
+                    baseServices: 'v0.9j'
                 },
                 config: {
                     //getEvaler: null,	//# function (sScope) { return function(vJS) { return eval(sJS); }; },
@@ -396,7 +397,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
 
                     //# Sets up the oCache entry for the passed _element
                     element: function (_element, oPrelimOptions, fnCallback, bSurpressErrors) {
-                        var sID,
+                        var sID, sStyleTags,
                             bIsLink = false,
                             a__Elements = [_element]
                         ;
@@ -408,7 +409,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                         if (oCache[sID]) {
                             $baseServices.compile.setEvaler(oCache[sID], oPrelimOptions, fnCallback, a__Elements /*, false*/);
                         }
-                            //# Else we need to build the oCache entry for this _element
+                        //# Else we need to build the oCache entry for this _element
                         else {
                             //# Determine the .tagName and process accordingly
                             switch (_element.tagName.toLowerCase()) {
@@ -468,10 +469,14 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                                     break;
                                 }
                                 default: {
-                                    //# .setCache for this _element (collecting the .css from the STYLE tag) then remove the style attribute from our _element
-                                    //#     NOTE: We remove the CSS so we avoid issues with partial styles and (in Angular) double processing of {{vars}}
-                                    $baseServices.compile.setCache(_element, oPrelimOptions, _element.getAttribute("style"), "*" /*, undefined*/);
-                                    _element.removeAttribute("style");
+                                    //# Compile the sStyleTags (data-ATTR-style, ATTR-style and plain ole'style) for this _element
+                                    sStyleTags = (_element.getAttribute($baseServices.config.attr + "-style") || "") +
+                                        (_element.getAttribute("data-" + $baseServices.config.attr + "-style") || "") +
+                                        (_element.getAttribute("style") || "")
+                                    ;
+
+                                    //# .setCache for this _element (collecting the .css from the STYLE tags)
+                                    $baseServices.compile.setCache(_element, oPrelimOptions, sStyleTags, "*" /*, undefined*/);
                                 }
                             } //# switch
 
@@ -668,11 +673,11 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                             function (oRecompiledCacheEntry /*, a__Elements*/) {
                                 var oParentOptions;
 
-                                //# If this $element isn't a LINK/STYLE tag, we can re-add the ng-css attribute now that we're post $compile
+                                //# If this $element isn't a LINK/STYLE tag, we can re-add the .config.attr now that we're post $compile
                                 //#     NOTE: We really don't need to do this, but it is what the user expects to be in place so it's good practice
                                 //#     NOTE: This is the Yang to .compileCallback's Yin
                                 if (oRecompiledCacheEntry.tag === "*") {
-                                    oCacheEntry.dom.setAttribute(oRecompiledCacheEntry.options.attr, oRecompiledCacheEntry[$baseServices.config.attr]);
+                                    oCacheEntry.dom.setAttribute(oRecompiledCacheEntry.options.attr, oRecompiledCacheEntry.options.a);
                                 }
 
                                 //# .resolve our oParentOptions (if any) then .processCacheOptions for both the oParentOptions and the oRecompiledCacheEntry
@@ -1168,7 +1173,7 @@ Add in a library such as Chroma (https://github.com/gka/chroma.js) to get color 
                             //oCacheEntry.dom.setAttribute("style", sProcessedCSS); //# <=IE7 no likie, besides .style.cssText is more correct
                             oCacheEntry.dom.style.cssText = sProcessedCSS;
                         }
-                            //# Else this is a LINK/STYLE entry, so set the sProcessedCSS into the .html
+                        //# Else this is a LINK/STYLE entry, so set the sProcessedCSS into the .html
                         else {
                             //# If this is IE8 or below we'll have a .styleSheet (and .styleSheet.cssText) to set .css into, else we can use .innerHTML, see: http://stackoverflow.com/questions/9250386/trying-to-add-style-tag-using-javascript-innerhtml-in-ie8 , http://www.quirksmode.org/dom/html/#t00 , http://stackoverflow.com/questions/5618742/ie-8-and-7-bug-when-dynamically-adding-a-stylesheet , http://jonathonhill.net/2011-10-12/ie-innerhtml-style-bug/
                             //#     TODO: Test in IE8-
